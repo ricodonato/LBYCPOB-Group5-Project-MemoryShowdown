@@ -46,4 +46,13 @@ public class Player {
     public void registerRoundWin() {
         roundsWon++;
     }
+
+    /**
+     * Clears this player's per-round score and combo so a new round can start.
+     * roundsWon is intentionally NOT reset — it persists for the whole match.
+     */
+    public void resetRoundStats() {
+        this.score = 0;
+        this.currentCombo = 0;
+    }
 }
