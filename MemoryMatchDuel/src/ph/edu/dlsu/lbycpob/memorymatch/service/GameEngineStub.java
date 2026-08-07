@@ -60,4 +60,30 @@ public class GameEngineStub implements GameEngine {
     public Player getWinner() {
         return fakePlayers.isEmpty() ? null : fakePlayers.get(0);
     }
+
+    @Override
+    public void startNewMatch(Difficulty difficulty, Theme theme, List<String> playerNames, int bestOf) {
+        // Fake: just start a single round, ignore bestOf.
+        startNewRound(difficulty, theme, playerNames);
+    }
+
+    @Override
+    public void startNextRound() {
+        // No-op for the stub — nothing to advance.
+    }
+
+    @Override
+    public boolean isMatchOver() {
+        return false;
+    }
+
+    @Override
+    public Player getMatchWinner() {
+        return null;
+    }
+
+    @Override
+    public int getRoundsToWin() {
+        return 1;
+    }
 }
