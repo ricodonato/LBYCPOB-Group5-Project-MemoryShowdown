@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * PERSON A (Game Logic) OWNS THIS FILE.
- * Holds the set of cards for one round, sized by Difficulty and skinned by Theme.
- */
 public class Board {
 
     private final List<Card> cards;
