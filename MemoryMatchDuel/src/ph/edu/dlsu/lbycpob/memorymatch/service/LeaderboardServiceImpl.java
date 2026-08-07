@@ -1,4 +1,4 @@
-package ph.edu.dlsu.lbycpob.service;
+package ph.edu.dlsu.lbycpob.memorymatch.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
