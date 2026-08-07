@@ -14,6 +14,11 @@ public class GameEngineImpl implements GameEngine {
     private Card firstFlipped;
     private Card secondFlipped;
 
+    // Match-level (best-of-series) state
+    private Difficulty matchDifficulty;
+    private Theme matchTheme;
+    private int roundsToWin = 1;
+
     @Override
     public void startNewRound(Difficulty difficulty, Theme theme, List<String> playerNames) {
         this.board = new Board(difficulty, theme);
@@ -30,6 +35,10 @@ public class GameEngineImpl implements GameEngine {
     public Card flipCard(int cardId) {
         Card card = board.getCardById(cardId);
         if (card == null || card.isMatched() || card.isFaceUp()) {
+            return card;
+        }
+        // Don't allow a 3rd card to flip until checkMatch() resolves the first two.
+        if (firstFlipped != null && secondFlipped != null) {
             return card;
         }
         card.setFaceUp(true);
@@ -63,7 +72,19 @@ public class GameEngineImpl implements GameEngine {
 
         firstFlipped = null;
         secondFlipped = null;
+
+        if (board.isFullyMatched()) {
+            registerRoundWinner();
+        }
+
         return matched;
+    }
+
+    /** Credits the player with the highest score this round with a round win. */
+    private void registerRoundWinner() {
+        players.stream()
+                .max(Comparator.comparingInt(Player::getScore))
+                .ifPresent(Player::registerRoundWin);
     }
 
     private void advanceTurn() {
@@ -95,5 +116,63 @@ public class GameEngineImpl implements GameEngine {
         return players.stream()
                 .max(Comparator.comparingInt(Player::getScore))
                 .orElse(null);
+    }
+
+    @Override
+    public void startNewMatch(Difficulty difficulty, Theme theme, List<String> playerNames, int bestOf) {
+        if (bestOf < 1) {
+            throw new IllegalArgumentException("bestOf must be at least 1");
+        }
+        this.matchDifficulty = difficulty;
+        this.matchTheme = theme;
+        this.roundsToWin = (bestOf / 2) + 1; // e.g. bestOf=3 -> need 2 wins, bestOf=5 -> need 3 wins
+
+        this.players = new ArrayList<>();
+        for (String name : playerNames) {
+            players.add(new Player(name));
+        }
+        startRoundInternal();
+    }
+
+    @Override
+    public void startNextRound() {
+        if (matchDifficulty == null || matchTheme == null || players == null) {
+            throw new IllegalStateException("No match in progress — call startNewMatch() first.");
+        }
+        if (isMatchOver()) {
+            throw new IllegalStateException("Match is already over — check getMatchWinner().");
+        }
+        for (Player p : players) {
+            p.resetRoundStats();
+        }
+        startRoundInternal();
+    }
+
+    private void startRoundInternal() {
+        this.board = new Board(matchDifficulty, matchTheme);
+        this.currentPlayerIndex = 0;
+        this.firstFlipped = null;
+        this.secondFlipped = null;
+    }
+
+    @Override
+    public boolean isMatchOver() {
+        return getMatchWinner() != null;
+    }
+
+    @Override
+    public Player getMatchWinner() {
+        if (players == null) {
+            return null;
+        }
+        return players.stream()
+                .filter(p -> p.getRoundsWon() >= roundsToWin)
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public int getRoundsToWin() {
+        return roundsToWin;
     }
 }
