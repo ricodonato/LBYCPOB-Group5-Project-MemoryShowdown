@@ -32,4 +32,23 @@ public interface GameEngine {
 
     /** Returns the player with the highest score once the round is over. */
     Player getWinner();
+
+
+    void startNewMatch(Difficulty difficulty, Theme theme, List<String> playerNames, int bestOf);
+
+    /**
+     * Starts the next round of the current match: same players and settings, board is
+     * regenerated, each player's per-round score/combo resets, but roundsWon is kept.
+     * Only call this when a match is in progress and isMatchOver() is false.
+     */
+    void startNextRound();
+
+    /** True once a player has won enough rounds to take the whole match. */
+    boolean isMatchOver();
+
+    /** Returns the player who has won the match (by rounds), or null if the match isn't over yet. */
+    Player getMatchWinner();
+
+    /** Returns how many round-wins are needed to take the current match. */
+    int getRoundsToWin();
 }
