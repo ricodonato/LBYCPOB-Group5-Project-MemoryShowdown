@@ -14,6 +14,11 @@ public class GameEngineImpl implements GameEngine {
     private Card firstFlipped;
     private Card secondFlipped;
 
+    // Match-level (best-of-series) state
+    private Difficulty matchDifficulty;
+    private Theme matchTheme;
+    private int roundsToWin = 1;
+
     @Override
     public void startNewRound(Difficulty difficulty, Theme theme, List<String> playerNames) {
         this.board = new Board(difficulty, theme);
@@ -30,6 +35,10 @@ public class GameEngineImpl implements GameEngine {
     public Card flipCard(int cardId) {
         Card card = board.getCardById(cardId);
         if (card == null || card.isMatched() || card.isFaceUp()) {
+            return card;
+        }
+        // Don't allow a 3rd card to flip until checkMatch() resolves the first two.
+        if (firstFlipped != null && secondFlipped != null) {
             return card;
         }
         card.setFaceUp(true);
@@ -63,7 +72,19 @@ public class GameEngineImpl implements GameEngine {
 
         firstFlipped = null;
         secondFlipped = null;
+
+        if (board.isFullyMatched()) {
+            registerRoundWinner();
+        }
+
         return matched;
+    }
+
+    /** Credits the player with the highest score this round with a round win. */
+    private void registerRoundWinner() {
+        players.stream()
+                .max(Comparator.comparingInt(Player::getScore))
+                .ifPresent(Player::registerRoundWin);
     }
 
     private void advanceTurn() {
@@ -74,26 +95,3 @@ public class GameEngineImpl implements GameEngine {
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
-
-    @Override
-    public List<Player> getPlayers() {
-        return players;
-    }
-
-    @Override
-    public boolean isRoundOver() {
-        return board.isFullyMatched();
-    }
-
-    @Override
-    public List<Card> getBoardState() {
-        return board.getCards();
-    }
-
-    @Override
-    public Player getWinner() {
-        return players.stream()
-                .max(Comparator.comparingInt(Player::getScore))
-                .orElse(null);
-    }
-}
