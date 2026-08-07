@@ -95,3 +95,84 @@ public class GameEngineImpl implements GameEngine {
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
+
+    @Override
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    @Override
+    public boolean isRoundOver() {
+        return board.isFullyMatched();
+    }
+
+    @Override
+    public List<Card> getBoardState() {
+        return board.getCards();
+    }
+
+    @Override
+    public Player getWinner() {
+        return players.stream()
+                .max(Comparator.comparingInt(Player::getScore))
+                .orElse(null);
+    }
+
+    @Override
+    public void startNewMatch(Difficulty difficulty, Theme theme, List<String> playerNames, int bestOf) {
+        if (bestOf < 1) {
+            throw new IllegalArgumentException("bestOf must be at least 1");
+        }
+        this.matchDifficulty = difficulty;
+        this.matchTheme = theme;
+        this.roundsToWin = (bestOf / 2) + 1; // e.g. bestOf=3 -> need 2 wins, bestOf=5 -> need 3 wins
+
+        this.players = new ArrayList<>();
+        for (String name : playerNames) {
+            players.add(new Player(name));
+        }
+        startRoundInternal();
+    }
+
+    @Override
+    public void startNextRound() {
+        if (matchDifficulty == null || matchTheme == null || players == null) {
+            throw new IllegalStateException("No match in progress — call startNewMatch() first.");
+        }
+        if (isMatchOver()) {
+            throw new IllegalStateException("Match is already over — check getMatchWinner().");
+        }
+        for (Player p : players) {
+            p.resetRoundStats();
+        }
+        startRoundInternal();
+    }
+
+    private void startRoundInternal() {
+        this.board = new Board(matchDifficulty, matchTheme);
+        this.currentPlayerIndex = 0;
+        this.firstFlipped = null;
+        this.secondFlipped = null;
+    }
+
+    @Override
+    public boolean isMatchOver() {
+        return getMatchWinner() != null;
+    }
+
+    @Override
+    public Player getMatchWinner() {
+        if (players == null) {
+            return null;
+        }
+        return players.stream()
+                .filter(p -> p.getRoundsWon() >= roundsToWin)
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public int getRoundsToWin() {
+        return roundsToWin;
+    }
+}
