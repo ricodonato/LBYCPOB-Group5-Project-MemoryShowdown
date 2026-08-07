@@ -1,10 +1,6 @@
 package ph.edu.dlsu.lbycpob.memorymatch.model;
 
-/**
- * PERSON A (Game Logic) OWNS THIS FILE.
- * In-memory representation of a player during an active match
- * (not the same as the database entity Person C will build).
- */
+
 public class Player {
 
     private final String name;
