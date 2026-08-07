@@ -5,11 +5,7 @@ import ph.edu.dlsu.lbycpob.memorymatch.entity.PlayerEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * PERSON B (UI) CAN USE THIS WHILE WAITING FOR PERSON C'S DATABASE LAYER.
- * Returns fake leaderboard data with no PostgreSQL connection required.
- * Swap for LeaderboardServiceImpl once the real one is ready.
- */
+
 public class LeaderboardServiceStub implements LeaderboardService {
 
     @Override

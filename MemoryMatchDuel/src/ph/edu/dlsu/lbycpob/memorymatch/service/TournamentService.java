@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * SHARED CONTRACT for the tournament feature (proposal objective #8:
  * "allow users to create a tournament that each user can join").
  * PERSON A implements the bracket logic; PERSON B builds the UI against
  * this interface.

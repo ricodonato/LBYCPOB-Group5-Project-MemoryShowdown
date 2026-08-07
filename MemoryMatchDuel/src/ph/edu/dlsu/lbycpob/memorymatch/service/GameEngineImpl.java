@@ -82,9 +82,22 @@ public class GameEngineImpl implements GameEngine {
 
     /** Credits the player with the highest score this round with a round win. */
     private void registerRoundWinner() {
-        players.stream()
-                .max(Comparator.comparingInt(Player::getScore))
-                .ifPresent(Player::registerRoundWin);
+        int highestScore = players.stream()
+                .mapToInt(Player::getScore)
+                .max()
+                .orElse(0);
+
+        long playersAtHighScore = players.stream()
+                .filter(p -> p.getScore() == highestScore)
+                .count();
+
+        if (playersAtHighScore == 1) {
+            players.stream()
+                    .filter(p -> p.getScore() == highestScore)
+                    .findFirst()
+                    .ifPresent(Player::registerRoundWin);
+        }
+        // else: tied round, no winner credited
     }
 
     private void advanceTurn() {

@@ -31,6 +31,11 @@ public class TournamentServiceImpl implements TournamentService {
 
     @Override
     public List<TournamentMatch> generateSchedule() {
+        if (registeredPlayers.size() < 2) {
+            throw new IllegalStateException(
+                    "Need at least 2 registered players to generate a tournament schedule (currently "
+                            + registeredPlayers.size() + ").");
+        }
         List<TournamentMatch> schedule = new ArrayList<>();
         for (int i = 0; i < registeredPlayers.size(); i++) {
             for (int j = i + 1; j < registeredPlayers.size(); j++) {
