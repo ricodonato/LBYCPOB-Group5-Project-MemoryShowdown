@@ -1,9 +1,6 @@
 package ph.edu.dlsu.lbycpob.memorymatch.model;
 
-/**
- * PERSON A (Game Logic) OWNS THIS FILE.
- * Difficulty controls how many cards are on the board (must be even).
- */
+
 public enum Difficulty {
     EASY(8),
     MEDIUM(14),

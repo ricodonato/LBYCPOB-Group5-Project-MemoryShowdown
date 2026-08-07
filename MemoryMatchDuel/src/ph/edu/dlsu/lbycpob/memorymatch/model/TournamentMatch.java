@@ -1,9 +1,6 @@
 package ph.edu.dlsu.lbycpob.memorymatch.model;
 
-/**
- * PERSON A (Game Logic) OWNS THIS FILE.
- * One head-to-head pairing within a tournament round-robin.
- */
+
 public class TournamentMatch {
 
     private final String playerA;
