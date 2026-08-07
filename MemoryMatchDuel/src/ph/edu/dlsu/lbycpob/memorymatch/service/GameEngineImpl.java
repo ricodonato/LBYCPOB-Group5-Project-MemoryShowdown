@@ -1,4 +1,4 @@
-package ph.edu.dlsu.lbycpob.service;
+package ph.edu.dlsu.lbycpob.memorymatch.service;
 
 import ph.edu.dlsu.lbycpob.memorymatch.model.*;
 
