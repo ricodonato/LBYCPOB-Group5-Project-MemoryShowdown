@@ -6,11 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * PERSON A (Game Logic) OWNS THIS FILE.
- * Real implementation of GameEngine. Build and unit-test this independently —
- * it has no dependency on JavaFX or the database.
- */
 public class GameEngineImpl implements GameEngine {
 
     private Board board;

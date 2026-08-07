@@ -7,12 +7,6 @@ import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 
 import java.util.List;
 
-/**
- * SHARED CONTRACT — agree on this together before splitting up.
- * PERSON A implements this. PERSON B (UI) codes against this interface only,
- * so the UI can be built before the real logic is finished (use GameEngineStub
- * in the meantime).
- */
 public interface GameEngine {
 
     /** Starts a new round with the given difficulty, theme, and player names. */
