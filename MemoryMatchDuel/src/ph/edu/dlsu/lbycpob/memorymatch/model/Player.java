@@ -7,12 +7,14 @@ public class Player {
     private int score;
     private int currentCombo;
     private int roundsWon;
+    private int missCount;
 
     public Player(String name) {
         this.name = name;
         this.score = 0;
         this.currentCombo = 0;
         this.roundsWon = 0;
+        this.missCount = 0;
     }
 
     public String getName() {
@@ -31,6 +33,10 @@ public class Player {
         return roundsWon;
     }
 
+    public int getMissCount() {
+        return missCount;
+    }
+
     /** Call when this player successfully matches a pair. */
     public void registerMatch(int basePoints) {
         currentCombo++;
@@ -45,6 +51,7 @@ public class Player {
 
     public void registerRoundWin() {
         roundsWon++;
+        missCount++;
     }
 
     /**
@@ -54,5 +61,6 @@ public class Player {
     public void resetRoundStats() {
         this.score = 0;
         this.currentCombo = 0;
+        this.missCount = 0;
     }
 }
