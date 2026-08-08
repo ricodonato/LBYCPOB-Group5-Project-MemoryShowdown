@@ -47,11 +47,11 @@ public class Player {
     /** Call when this player flips a non-matching pair; combo resets. */
     public void registerMiss() {
         currentCombo = 0;
+        missCount++;
     }
 
     public void registerRoundWin() {
         roundsWon++;
-        missCount++;
     }
 
     /**
