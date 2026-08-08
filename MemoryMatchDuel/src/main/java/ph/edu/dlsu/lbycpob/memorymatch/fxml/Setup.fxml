@@ -1,4 +1,186 @@
-package ph.edu.dlsu.lbycpob.memorymatch.fxml;
+<?xml version="1.0" encoding="UTF-8"?>
 
-public class Setup {
-}
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane
+        styleClass="screen-container"
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="ph.edu.dlsu.lbycpob.memorymatch.ui.SetupController">
+
+    <VBox
+            alignment="CENTER"
+            maxWidth="980"
+            spacing="16"
+            styleClass="content-card">
+
+        <Label
+                text="DUEL SETUP"
+                styleClass="eyebrow-label"/>
+
+        <Label
+                fx:id="playersLabel"
+                text="Player 1  VS  Player 2"
+                styleClass="title-label"/>
+
+        <Label
+                text="Choose the board size, card theme, and length of the match."
+                styleClass="subtitle-label"/>
+
+        <VBox
+                alignment="CENTER"
+                spacing="10"
+                styleClass="option-section">
+
+            <Label
+                    text="DIFFICULTY"
+                    styleClass="section-label"/>
+
+            <HBox
+                    alignment="CENTER"
+                    spacing="10">
+
+                <fx:define>
+                    <ToggleGroup
+                            fx:id="difficultyGroup"/>
+                </fx:define>
+
+                <ToggleButton
+                        fx:id="easyToggle"
+                        text="EASY • 8 CARDS"
+                        toggleGroup="$difficultyGroup"
+                        selected="true"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="mediumToggle"
+                        text="MEDIUM • 14"
+                        toggleGroup="$difficultyGroup"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="hardToggle"
+                        text="HARD • 20"
+                        toggleGroup="$difficultyGroup"
+                        styleClass="option-toggle"/>
+
+            </HBox>
+        </VBox>
+
+        <VBox
+                alignment="CENTER"
+                spacing="10"
+                styleClass="option-section">
+
+            <Label
+                    text="THEME"
+                    styleClass="section-label"/>
+
+            <HBox
+                    alignment="CENTER"
+                    spacing="10">
+
+                <fx:define>
+                    <ToggleGroup
+                            fx:id="themeGroup"/>
+                </fx:define>
+
+                <ToggleButton
+                        fx:id="animalsToggle"
+                        text="🐶 ANIMALS"
+                        toggleGroup="$themeGroup"
+                        selected="true"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="sportsToggle"
+                        text="⚽ SPORTS"
+                        toggleGroup="$themeGroup"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="foodToggle"
+                        text="🍕 FOOD"
+                        toggleGroup="$themeGroup"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="emojisToggle"
+                        text="😀 EMOJIS"
+                        toggleGroup="$themeGroup"
+                        styleClass="option-toggle"/>
+
+            </HBox>
+        </VBox>
+
+        <VBox
+                alignment="CENTER"
+                spacing="10"
+                styleClass="option-section">
+
+            <Label
+                    text="MATCH FORMAT"
+                    styleClass="section-label"/>
+
+            <HBox
+                    alignment="CENTER"
+                    spacing="10">
+
+                <fx:define>
+                    <ToggleGroup
+                            fx:id="bestOfGroup"/>
+                </fx:define>
+
+                <ToggleButton
+                        fx:id="bestOf1Toggle"
+                        text="BEST OF 1"
+                        toggleGroup="$bestOfGroup"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="bestOf3Toggle"
+                        text="BEST OF 3"
+                        toggleGroup="$bestOfGroup"
+                        selected="true"
+                        styleClass="option-toggle"/>
+
+                <ToggleButton
+                        fx:id="bestOf5Toggle"
+                        text="BEST OF 5"
+                        toggleGroup="$bestOfGroup"
+                        styleClass="option-toggle"/>
+
+            </HBox>
+
+            <Label
+                    text="A tied round gives no round win and is replayed on a fresh board."
+                    styleClass="hint-label"/>
+
+        </VBox>
+
+        <HBox
+                alignment="CENTER"
+                spacing="12"
+                style="-fx-padding: 8 0 0 0;">
+
+            <Button
+                    text="BACK"
+                    styleClass="cartoon-button, ghost-button"
+                    onAction="#handleBack"/>
+
+            <Button
+                    text="START SHOWDOWN"
+                    styleClass="cartoon-button, primary-button"
+                    onAction="#handleStart"/>
+
+        </HBox>
+
+    </VBox>
+
+</StackPane>
