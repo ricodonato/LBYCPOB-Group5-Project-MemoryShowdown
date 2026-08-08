@@ -51,4 +51,13 @@ public interface GameEngine {
 
     /** Returns how many round-wins are needed to take the current match. */
     int getRoundsToWin();
+
+    /** Returns the difficulty of the current/last match. */
+    Difficulty getDifficulty();
+
+    /** Returns the theme of the current/last match. */
+    Theme getTheme();
+
+    /** Returns the player who lost the match (the non-winner), or null if match isn't over. */
+    Player getLoser();
 }

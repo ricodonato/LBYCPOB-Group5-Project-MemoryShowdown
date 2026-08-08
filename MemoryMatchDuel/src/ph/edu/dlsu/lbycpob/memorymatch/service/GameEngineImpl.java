@@ -188,4 +188,26 @@ public class GameEngineImpl implements GameEngine {
     public int getRoundsToWin() {
         return roundsToWin;
     }
+
+    @Override
+    public Difficulty getDifficulty() {
+        return matchDifficulty;
+    }
+
+    @Override
+    public Theme getTheme() {
+        return matchTheme;
+    }
+
+    @Override
+    public Player getLoser() {
+        Player winner = getMatchWinner();
+        if (winner == null) {
+            return null;
+        }
+        return players.stream()
+                .filter(p -> p != winner)
+                .findFirst()
+                .orElse(null);
+    }
 }
