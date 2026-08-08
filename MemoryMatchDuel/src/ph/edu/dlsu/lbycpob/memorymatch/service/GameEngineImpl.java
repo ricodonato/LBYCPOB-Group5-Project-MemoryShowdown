@@ -21,6 +21,7 @@ public class GameEngineImpl implements GameEngine {
 
     @Override
     public void startNewRound(Difficulty difficulty, Theme theme, List<String> playerNames) {
+        validatePlayerNames(playerNames);
         this.board = new Board(difficulty, theme);
         this.players = new ArrayList<>();
         for (String name : playerNames) {
@@ -87,17 +88,27 @@ public class GameEngineImpl implements GameEngine {
                 .max()
                 .orElse(0);
 
-        long playersAtHighScore = players.stream()
+        List<Player> playersAtHighScore = players.stream()
                 .filter(p -> p.getScore() == highestScore)
-                .count();
+                .toList();
 
-        if (playersAtHighScore == 1) {
-            players.stream()
-                    .filter(p -> p.getScore() == highestScore)
-                    .findFirst()
-                    .ifPresent(Player::registerRoundWin);
+        if (playersAtHighScore.size() == 1) {
+            playersAtHighScore.get(0).registerRoundWin();
+            return;
         }
-        // else: tied round, no winner credited
+
+        int fewestMisses = playersAtHighScore.stream()
+                .mapToInt(Player::getMissCount)
+                .min()
+                .orElse(0);
+
+        List<Player> tiebreakWinners = playersAtHighScore.stream()
+                .filter(p -> p.getMissCount() == fewestMisses)
+                .toList();
+
+        if (tiebreakWinners.size() == 1) {
+            tiebreakWinners.get(0).registerRoundWin();
+        }
     }
 
     private void advanceTurn() {
@@ -136,6 +147,7 @@ public class GameEngineImpl implements GameEngine {
         if (bestOf < 1) {
             throw new IllegalArgumentException("bestOf must be at least 1");
         }
+        validatePlayerNames(playerNames);
         this.matchDifficulty = difficulty;
         this.matchTheme = theme;
         this.roundsToWin = (bestOf / 2) + 1; // e.g. bestOf=3 -> need 2 wins, bestOf=5 -> need 3 wins
@@ -209,5 +221,19 @@ public class GameEngineImpl implements GameEngine {
                 .filter(p -> p != winner)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void validatePlayerNames(List<String> playerNames) {
+        if (playerNames == null || playerNames.size() < 2) {
+            throw new IllegalArgumentException("Need at least 2 players to start a game.");
+        }
+        for (String name : playerNames) {
+            if (name == null || name.isBlank()) {
+                throw new IllegalArgumentException("Player names must not be null or blank.");
+            }
+        }
+        if (playerNames.stream().map(String::trim).distinct().count() != playerNames.size()) {
+            throw new IllegalArgumentException("Player names must be unique.");
+        }
     }
 }
