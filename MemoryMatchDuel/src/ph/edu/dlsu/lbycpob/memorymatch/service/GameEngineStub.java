@@ -86,4 +86,19 @@ public class GameEngineStub implements GameEngine {
     public int getRoundsToWin() {
         return 1;
     }
+
+    @Override
+    public Difficulty getDifficulty() {
+        return null;
+    }
+
+    @Override
+    public Theme getTheme() {
+        return null;
+    }
+
+    @Override
+    public Player getLoser() {
+        return null;
+    }
 }
