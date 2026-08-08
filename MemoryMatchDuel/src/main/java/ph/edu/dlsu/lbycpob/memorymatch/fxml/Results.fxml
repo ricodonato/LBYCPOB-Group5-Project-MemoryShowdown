@@ -1,4 +1,94 @@
-package ph.edu.dlsu.lbycpob.memorymatch.fxml;
+<?xml version="1.0" encoding="UTF-8"?>
 
-public class Results {
-}
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane
+        styleClass="screen-container"
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="ph.edu.dlsu.lbycpob.memorymatch.ui.ResultsController">
+
+    <VBox
+            alignment="CENTER"
+            maxWidth="900"
+            spacing="16"
+            styleClass="result-card">
+
+        <Label
+                fx:id="resultTitleLabel"
+                text="ROUND COMPLETE"
+                styleClass="eyebrow-label"/>
+
+        <Label
+                fx:id="winnerLabel"
+                text="Winner"
+                styleClass="winner-banner"
+                wrapText="true"/>
+
+        <Label
+                fx:id="statusLabel"
+                text=""
+                styleClass="subtitle-label"/>
+
+        <VBox
+                alignment="CENTER"
+                spacing="8"
+                styleClass="result-stats">
+
+            <Label
+                    text="ROUND SCORE"
+                    styleClass="small-heading"/>
+
+            <Label
+                    fx:id="roundScoreLabel"
+                    styleClass="result-stat-line"
+                    wrapText="true"/>
+
+            <Label
+                    text="SERIES SCORE"
+                    styleClass="small-heading"
+                    style="-fx-padding: 10 0 0 0;"/>
+
+            <Label
+                    fx:id="seriesScoreLabel"
+                    styleClass="result-stat-line"
+                    wrapText="true"/>
+
+        </VBox>
+
+        <HBox
+                alignment="CENTER"
+                spacing="10"
+                style="-fx-padding: 12 0 0 0;">
+
+            <Button
+                    fx:id="nextRoundButton"
+                    text="NEXT ROUND"
+                    styleClass="cartoon-button, green-button"
+                    onAction="#handleNextRound"/>
+
+            <Button
+                    fx:id="newMatchButton"
+                    text="NEW MATCH"
+                    styleClass="cartoon-button, green-button"
+                    onAction="#handleNewMatch"/>
+
+            <Button
+                    text="LEADERBOARD"
+                    styleClass="cartoon-button, blue-button"
+                    onAction="#handleLeaderboard"/>
+
+            <Button
+                    text="MAIN MENU"
+                    styleClass="cartoon-button, ghost-button"
+                    onAction="#handleMainMenu"/>
+
+        </HBox>
+
+    </VBox>
+
+</StackPane>
