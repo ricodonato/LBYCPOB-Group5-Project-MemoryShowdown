@@ -1,4 +1,137 @@
-package ph.edu.dlsu.lbycpob.memorymatch.fxml;
+<?xml version="1.0" encoding="UTF-8"?>
 
-public class Tournament {
-}
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane
+        styleClass="screen-container"
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="ph.edu.dlsu.lbycpob.memorymatch.ui.TournamentController">
+
+    <VBox
+            alignment="TOP_CENTER"
+            maxWidth="1000"
+            spacing="12"
+            styleClass="content-card">
+
+        <Label
+                text="TOURNAMENT MODE"
+                styleClass="eyebrow-label"/>
+
+        <Label
+                text="Round-Robin Lobby"
+                styleClass="title-label"/>
+
+        <HBox
+                alignment="CENTER"
+                spacing="10">
+
+            <TextField
+                    fx:id="joinField"
+                    promptText="Enter player name"
+                    prefWidth="280"
+                    styleClass="cartoon-textfield"
+                    onAction="#handleJoin"/>
+
+            <Button
+                    text="JOIN"
+                    styleClass="cartoon-button, green-button"
+                    onAction="#handleJoin"/>
+
+            <Button
+                    text="RESET"
+                    styleClass="cartoon-button, danger-outline-button"
+                    onAction="#handleReset"/>
+
+        </HBox>
+
+        <Label
+                fx:id="errorLabel"
+                visible="false"
+                managed="false"
+                styleClass="error-label"/>
+
+        <HBox
+                alignment="TOP_CENTER"
+                spacing="18"
+                VBox.vgrow="ALWAYS">
+
+            <VBox
+                    prefWidth="250"
+                    spacing="8"
+                    styleClass="tournament-panel">
+
+                <Label
+                        text="PLAYERS"
+                        styleClass="small-heading"/>
+
+                <VBox
+                        fx:id="playersContainer"
+                        spacing="6"/>
+
+                <Button
+                        text="GENERATE SCHEDULE"
+                        maxWidth="1.7976931348623157E308"
+                        styleClass="mini-button, blue-button"
+                        onAction="#handleGenerateSchedule"/>
+
+            </VBox>
+
+            <VBox
+                    prefWidth="430"
+                    spacing="8"
+                    styleClass="tournament-panel">
+
+                <Label
+                        text="MATCHES"
+                        styleClass="small-heading"/>
+
+                <ScrollPane
+                        fitToWidth="true"
+                        prefViewportHeight="380"
+                        styleClass="clean-scroll">
+
+                    <content>
+
+                        <VBox
+                                fx:id="matchesContainer"
+                                spacing="8"
+                                style="-fx-padding: 4;"/>
+
+                    </content>
+
+                </ScrollPane>
+
+            </VBox>
+
+            <VBox
+                    prefWidth="250"
+                    spacing="8"
+                    styleClass="tournament-panel">
+
+                <Label
+                        text="STANDINGS"
+                        styleClass="small-heading"/>
+
+                <VBox
+                        fx:id="standingsContainer"
+                        spacing="7"/>
+
+            </VBox>
+
+        </HBox>
+
+        <Button
+                text="BACK TO MENU"
+                styleClass="cartoon-button, ghost-button"
+                onAction="#handleBack"/>
+
+    </VBox>
+
+</StackPane>
