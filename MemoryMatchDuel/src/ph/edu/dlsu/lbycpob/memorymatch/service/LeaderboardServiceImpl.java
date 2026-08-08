@@ -6,6 +6,7 @@ import ph.edu.dlsu.lbycpob.memorymatch.entity.MatchResultEntity;
 import ph.edu.dlsu.lbycpob.memorymatch.entity.PlayerEntity;
 import ph.edu.dlsu.lbycpob.memorymatch.repository.MatchResultRepository;
 import ph.edu.dlsu.lbycpob.memorymatch.repository.PlayerRepository;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     @Override
     public List<PlayerEntity> getTopPlayers(int limit) {
-        return playerRepository.findTop10ByOrderByHighestScoreDesc();
+        return playerRepository.findAllByOrderByHighestScoreDesc(PageRequest.of(0, limit));
     }
 
     @Override

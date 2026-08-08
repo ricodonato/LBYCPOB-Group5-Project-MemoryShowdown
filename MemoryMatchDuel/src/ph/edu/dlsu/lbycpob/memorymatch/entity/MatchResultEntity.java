@@ -23,7 +23,7 @@ public class MatchResultEntity {
     private String difficulty;
     private String theme;
 
-    protected MatchResultEntity() {
+    public MatchResultEntity() {
         // required by JPA — don't call this directly
     }
 
