@@ -2,110 +2,140 @@ package ph.edu.dlsu.lbycpob.memorymatch.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 
-import java.util.List;
+import ph.edu.dlsu.lbycpob.memorymatch.model.Difficulty;
+import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 
-public class NameEntryController {
-
-    @FXML
-    private TextField player1Field;
+public class SetupController {
 
     @FXML
-    private TextField player2Field;
+    private ToggleButton easyToggle;
 
     @FXML
-    private Label errorLabel;
+    private ToggleButton mediumToggle;
+
+    @FXML
+    private ToggleButton hardToggle;
+
+    @FXML
+    private ToggleButton animalsToggle;
+
+    @FXML
+    private ToggleButton sportsToggle;
+
+    @FXML
+    private ToggleButton foodToggle;
+
+    @FXML
+    private ToggleButton emojisToggle;
+
+    @FXML
+    private ToggleButton bestOf1Toggle;
+
+    @FXML
+    private ToggleButton bestOf3Toggle;
+
+    @FXML
+    private ToggleButton bestOf5Toggle;
+
+    @FXML
+    private Label playersLabel;
 
     @FXML
     private void initialize() {
 
-        List<String> current =
-                SceneManager.get()
-                        .getPendingPlayerNames();
-
-        if (current.size() >= 2) {
-
-            player1Field.setText(
-                    current.get(0)
-            );
-
-            player2Field.setText(
-                    current.get(1)
-            );
-        }
-    }
-
-    @FXML
-    private void handleNext() {
-
-        String p1 =
-                clean(player1Field.getText());
-
-        String p2 =
-                clean(player2Field.getText());
-
-        if (p1.isEmpty() || p2.isEmpty()) {
-
-            showError(
-                    "Enter a name for both players."
-            );
-
-            return;
-        }
-
-        if (p1.equalsIgnoreCase(p2)) {
-
-            showError(
-                    "Player names must be different."
-            );
-
-            return;
-        }
-
-        if (p1.length() > 18
-                || p2.length() > 18) {
-
-            showError(
-                    "Keep each player name at 18 characters or fewer."
-            );
-
-            return;
-        }
-
-        errorLabel.setVisible(false);
-
-        SceneManager.get()
-                .setPendingPlayerNames(
-                        List.of(p1, p2)
-                );
-
-        SceneManager.get().switchTo(
-                "/fxml/setup.fxml",
-                "Memory Match Showdown - Setup"
+        playersLabel.setText(
+                String.join(
+                        "  VS  ",
+                        SceneManager.get()
+                                .getPendingPlayerNames()
+                )
         );
     }
 
-    private String clean(String value) {
+    @FXML
+    private void handleStart() {
 
-        return value == null
-                ? ""
-                : value.trim();
-    }
+        Difficulty difficulty =
+                Difficulty.EASY;
 
-    private void showError(String message) {
+        if (mediumToggle.isSelected()) {
+            difficulty =
+                    Difficulty.MEDIUM;
+        }
 
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        errorLabel.setManaged(true);
+        if (hardToggle.isSelected()) {
+            difficulty =
+                    Difficulty.HARD;
+        }
+
+        Theme theme =
+                Theme.ANIMALS;
+
+        if (sportsToggle.isSelected()) {
+            theme = Theme.SPORTS;
+        }
+
+        if (foodToggle.isSelected()) {
+            theme = Theme.FOOD;
+        }
+
+        if (emojisToggle.isSelected()) {
+            theme = Theme.EMOJIS;
+        }
+
+        int bestOf = 3;
+
+        if (bestOf1Toggle.isSelected()) {
+            bestOf = 1;
+        }
+
+        if (bestOf5Toggle.isSelected()) {
+            bestOf = 5;
+        }
+
+        SceneManager manager =
+                SceneManager.get();
+
+        manager.setPendingDifficulty(
+                difficulty
+        );
+
+        manager.setPendingTheme(
+                theme
+        );
+
+        manager.setPendingBestOf(
+                bestOf
+        );
+
+        manager.resetRoundNumber();
+
+        /*
+         * Start a complete best-of match,
+         * not only one individual round.
+         */
+        manager.getGameEngine()
+                .startNewMatch(
+                        difficulty,
+                        theme,
+                        manager.getPendingPlayerNames(),
+                        bestOf
+                );
+
+        manager.switchTo(
+                "/fxml/game_board.fxml",
+                "Memory Match Showdown - Game"
+        );
     }
 
     @FXML
     private void handleBack() {
 
         SceneManager.get().switchTo(
-                "/fxml/welcome.fxml",
-                "Memory Match Showdown"
+                "/fxml/name_entry.fxml",
+                "Memory Match Showdown - Players"
         );
     }
 }
