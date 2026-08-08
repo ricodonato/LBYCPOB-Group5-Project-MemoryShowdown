@@ -1,141 +1,239 @@
 package ph.edu.dlsu.lbycpob.memorymatch.ui;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
 
-import ph.edu.dlsu.lbycpob.memorymatch.model.Difficulty;
-import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
+import ph.edu.dlsu.lbycpob.memorymatch.model.Player;
+import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngine;
 
-public class SetupController {
+import java.util.Comparator;
+import java.util.List;
 
-    @FXML
-    private ToggleButton easyToggle;
-
-    @FXML
-    private ToggleButton mediumToggle;
+public class ResultsController {
 
     @FXML
-    private ToggleButton hardToggle;
+    private Label resultTitleLabel;
 
     @FXML
-    private ToggleButton animalsToggle;
+    private Label winnerLabel;
 
     @FXML
-    private ToggleButton sportsToggle;
+    private Label roundScoreLabel;
 
     @FXML
-    private ToggleButton foodToggle;
+    private Label seriesScoreLabel;
 
     @FXML
-    private ToggleButton emojisToggle;
+    private Label statusLabel;
 
     @FXML
-    private ToggleButton bestOf1Toggle;
+    private Button nextRoundButton;
 
     @FXML
-    private ToggleButton bestOf3Toggle;
+    private Button newMatchButton;
 
-    @FXML
-    private ToggleButton bestOf5Toggle;
-
-    @FXML
-    private Label playersLabel;
+    private final GameEngine engine =
+            SceneManager.get()
+                    .getGameEngine();
 
     @FXML
     private void initialize() {
 
-        playersLabel.setText(
-                String.join(
-                        "  VS  ",
-                        SceneManager.get()
-                                .getPendingPlayerNames()
-                )
+        List<Player> players =
+                engine.getPlayers();
+
+        List<Player> byScore =
+                players.stream()
+                        .sorted(
+                                Comparator
+                                        .comparingInt(
+                                                Player::getScore
+                                        )
+                                        .reversed()
+                        )
+                        .toList();
+
+        int highest =
+                byScore.isEmpty()
+                        ? 0
+                        : byScore.get(0)
+                        .getScore();
+
+        long atHighest =
+                players.stream()
+                        .filter(
+                                p ->
+                                        p.getScore()
+                                                == highest
+                        )
+                        .count();
+
+        Player roundWinner =
+                atHighest == 1
+                        && !byScore.isEmpty()
+                        ? byScore.get(0)
+                        : null;
+
+        roundScoreLabel.setText(
+                players.stream()
+                        .map(
+                                p ->
+                                        p.getName()
+                                                + "  "
+                                                + p.getScore()
+                                                + " pts"
+                        )
+                        .reduce(
+                                (a, b) ->
+                                        a
+                                                + "     |     "
+                                                + b
+                        )
+                        .orElse("")
         );
+
+        seriesScoreLabel.setText(
+                players.stream()
+                        .map(
+                                p ->
+                                        p.getName()
+                                                + "  "
+                                                + p.getRoundsWon()
+                                                + " round win"
+                                                + (
+                                                p.getRoundsWon() == 1
+                                                        ? ""
+                                                        : "s"
+                                        )
+                        )
+                        .reduce(
+                                (a, b) ->
+                                        a
+                                                + "     |     "
+                                                + b
+                        )
+                        .orElse("")
+        );
+
+        if (engine.isMatchOver()) {
+
+            Player champion =
+                    engine.getMatchWinner();
+
+            resultTitleLabel.setText(
+                    "MATCH COMPLETE"
+            );
+
+            winnerLabel.setText(
+                    champion == null
+                            ? "Match finished"
+                            : "🏆 "
+                              + champion.getName()
+                              + " wins the showdown!"
+            );
+
+            statusLabel.setText(
+                    "Best-of-"
+                            + SceneManager.get()
+                            .getPendingBestOf()
+                            + " series complete"
+            );
+
+            nextRoundButton.setVisible(false);
+            nextRoundButton.setManaged(false);
+
+            newMatchButton.setVisible(true);
+            newMatchButton.setManaged(true);
+
+        } else {
+
+            resultTitleLabel.setText(
+                    "ROUND "
+                            + SceneManager.get()
+                            .getCurrentRoundNumber()
+                            + " COMPLETE"
+            );
+
+            if (roundWinner == null) {
+
+                winnerLabel.setText(
+                        "🤝 Tied round - no round win awarded"
+                );
+
+                statusLabel.setText(
+                        "Replay with a fresh board to break the tie."
+                );
+
+                nextRoundButton.setText(
+                        "Replay Round"
+                );
+
+            } else {
+
+                winnerLabel.setText(
+                        "⭐ "
+                                + roundWinner.getName()
+                                + " takes the round!"
+                );
+
+                statusLabel.setText(
+                        "First to "
+                                + engine.getRoundsToWin()
+                                + " round wins takes the match."
+                );
+
+                nextRoundButton.setText(
+                        "Next Round"
+                );
+            }
+
+            nextRoundButton.setVisible(true);
+            nextRoundButton.setManaged(true);
+
+            newMatchButton.setVisible(false);
+            newMatchButton.setManaged(false);
+        }
     }
 
     @FXML
-    private void handleStart() {
+    private void handleNextRound() {
 
-        Difficulty difficulty =
-                Difficulty.EASY;
+        engine.startNextRound();
 
-        if (mediumToggle.isSelected()) {
-            difficulty =
-                    Difficulty.MEDIUM;
-        }
+        SceneManager.get()
+                .advanceRoundNumber();
 
-        if (hardToggle.isSelected()) {
-            difficulty =
-                    Difficulty.HARD;
-        }
-
-        Theme theme =
-                Theme.ANIMALS;
-
-        if (sportsToggle.isSelected()) {
-            theme = Theme.SPORTS;
-        }
-
-        if (foodToggle.isSelected()) {
-            theme = Theme.FOOD;
-        }
-
-        if (emojisToggle.isSelected()) {
-            theme = Theme.EMOJIS;
-        }
-
-        int bestOf = 3;
-
-        if (bestOf1Toggle.isSelected()) {
-            bestOf = 1;
-        }
-
-        if (bestOf5Toggle.isSelected()) {
-            bestOf = 5;
-        }
-
-        SceneManager manager =
-                SceneManager.get();
-
-        manager.setPendingDifficulty(
-                difficulty
-        );
-
-        manager.setPendingTheme(
-                theme
-        );
-
-        manager.setPendingBestOf(
-                bestOf
-        );
-
-        manager.resetRoundNumber();
-
-        /*
-         * Start a complete best-of match,
-         * not only one individual round.
-         */
-        manager.getGameEngine()
-                .startNewMatch(
-                        difficulty,
-                        theme,
-                        manager.getPendingPlayerNames(),
-                        bestOf
-                );
-
-        manager.switchTo(
+        SceneManager.get().switchTo(
                 "/fxml/game_board.fxml",
                 "Memory Match Showdown - Game"
         );
     }
 
     @FXML
-    private void handleBack() {
+    private void handleNewMatch() {
 
         SceneManager.get().switchTo(
-                "/fxml/name_entry.fxml",
-                "Memory Match Showdown - Players"
+                "/fxml/setup.fxml",
+                "Memory Match Showdown - Setup"
+        );
+    }
+
+    @FXML
+    private void handleLeaderboard() {
+
+        SceneManager.get().switchTo(
+                "/fxml/leaderboard.fxml",
+                "Memory Match Showdown - Leaderboard"
+        );
+    }
+
+    @FXML
+    private void handleMainMenu() {
+
+        SceneManager.get().switchTo(
+                "/fxml/welcome.fxml",
+                "Memory Match Showdown"
         );
     }
 }
