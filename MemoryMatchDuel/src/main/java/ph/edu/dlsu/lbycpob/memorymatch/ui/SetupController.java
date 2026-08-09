@@ -44,90 +44,54 @@ public class SetupController {
 
     @FXML
     private void initialize() {
-
-        playersLabel.setText(
-                String.join(
-                        "  VS  ",
-                        SceneManager.get()
-                                .getPendingPlayerNames()
-                )
-        );
+        if (SceneManager.get().isTournamentModeActive()) {
+            playersLabel.setText("Choose the match settings for this tournament.");
+        } else {
+            playersLabel.setText(
+                    String.join("  VS  ", SceneManager.get().getPendingPlayerNames())
+            );
+        }
     }
 
     @FXML
     private void handleStart() {
 
-        Difficulty difficulty =
-                Difficulty.EASY;
+        Difficulty difficulty = Difficulty.EASY;
+        if (mediumToggle.isSelected()) difficulty = Difficulty.MEDIUM;
+        if (hardToggle.isSelected()) difficulty = Difficulty.HARD;
 
-        if (mediumToggle.isSelected()) {
-            difficulty =
-                    Difficulty.MEDIUM;
-        }
-
-        if (hardToggle.isSelected()) {
-            difficulty =
-                    Difficulty.HARD;
-        }
-
-        Theme theme =
-                Theme.ANIMALS;
-
-        if (sportsToggle.isSelected()) {
-            theme = Theme.SPORTS;
-        }
-
-        if (foodToggle.isSelected()) {
-            theme = Theme.FOOD;
-        }
-
-        if (emojisToggle.isSelected()) {
-            theme = Theme.EMOJIS;
-        }
+        Theme theme = Theme.ANIMALS;
+        if (sportsToggle.isSelected()) theme = Theme.SPORTS;
+        if (foodToggle.isSelected()) theme = Theme.FOOD;
+        if (emojisToggle.isSelected()) theme = Theme.EMOJIS;
 
         int bestOf = 3;
+        if (bestOf1Toggle.isSelected()) bestOf = 1;
+        if (bestOf5Toggle.isSelected()) bestOf = 5;
 
-        if (bestOf1Toggle.isSelected()) {
-            bestOf = 1;
+        SceneManager manager = SceneManager.get();
+
+        if (manager.isTournamentModeActive()) {
+            manager.setTournamentDifficulty(difficulty);
+            manager.setTournamentTheme(theme);
+            manager.setTournamentBestOf(bestOf);
+
+            manager.getTournamentService().generateBracket();
+
+            manager.switchTo("/fxml/tournament.fxml", "Memory Match Showdown - Tournament");
+            return;
         }
 
-        if (bestOf5Toggle.isSelected()) {
-            bestOf = 5;
-        }
-
-        SceneManager manager =
-                SceneManager.get();
-
-        manager.setPendingDifficulty(
-                difficulty
-        );
-
-        manager.setPendingTheme(
-                theme
-        );
-
-        manager.setPendingBestOf(
-                bestOf
-        );
-
+        manager.setPendingDifficulty(difficulty);
+        manager.setPendingTheme(theme);
+        manager.setPendingBestOf(bestOf);
         manager.resetRoundNumber();
 
-        /*
-         * Start a complete best-of match,
-         * not only one individual round.
-         */
-        manager.getGameEngine()
-                .startNewMatch(
-                        difficulty,
-                        theme,
-                        manager.getPendingPlayerNames(),
-                        bestOf
-                );
-
-        manager.switchTo(
-                "/fxml/game_board.fxml",
-                "Memory Match Showdown - Game"
+        manager.getGameEngine().startNewMatch(
+                difficulty, theme, manager.getPendingPlayerNames(), bestOf
         );
+
+        manager.switchTo("/fxml/game_board.fxml", "Memory Match Showdown - Game");
     }
 
     @FXML
