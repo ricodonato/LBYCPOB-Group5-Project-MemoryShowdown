@@ -3,30 +3,29 @@ package ph.edu.dlsu.lbycpob.memorymatch.service;
 import ph.edu.dlsu.lbycpob.memorymatch.model.TournamentMatch;
 
 import java.util.List;
-import java.util.Map;
 
-/**
- * "allow users to create a tournament that each user can join").
- * PERSON A implements the bracket logic; PERSON B builds the UI against
- * this interface.
- */
 public interface TournamentService {
 
-    /** Registers a player into the current tournament lobby. */
     void joinTournament(String playerName);
 
-    /** Returns everyone currently signed up. */
     List<String> getRegisteredPlayers();
 
-    /** Generates a round-robin schedule once enough players have joined (min 2). */
-    List<TournamentMatch> generateSchedule();
+    /** Shuffles registered players and builds round 1 of a single-elimination bracket. */
+    void generateBracket();
 
-    /** Records the winner of one scheduled match. */
+    /** Matches for the round currently being played. */
+    List<TournamentMatch> getCurrentRoundMatches();
+
+    /** 1-indexed round number currently being played. */
+    int getCurrentRoundNumber();
+
+    /** Records a match's winner; auto-advances to the next round once the round is complete. */
     void recordMatchWinner(TournamentMatch match, String winnerName);
 
-    /** Returns win counts per player, sorted highest first. */
-    Map<String, Integer> getStandings();
+    boolean isTournamentComplete();
 
-    /** Resets the tournament lobby for a new one. */
+    /** Winner's name, or null if not complete yet. */
+    String getChampion();
+
     void resetTournament();
 }
