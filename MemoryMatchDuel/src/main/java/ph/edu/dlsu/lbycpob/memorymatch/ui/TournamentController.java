@@ -52,18 +52,21 @@ public class TournamentController {
 
     @FXML
     private void handleGenerateSchedule() {
-        if (tournamentService.getRegisteredPlayers().size() < 2) {
-            showError("Need at least 2 registered players to generate a bracket (currently "
-                    + tournamentService.getRegisteredPlayers().size() + ").");
+        int count = tournamentService.getRegisteredPlayers().size();
+
+        if (count < 2) {
+            showError("Need at least 2 registered players to generate a bracket (currently " + count + ").");
+            return;
+        }
+
+        if (count % 2 != 0) {
+            showError("Bracket needs an even number of players (currently " + count + "). Add one more or remove one.");
             return;
         }
 
         hideError();
         SceneManager.get().setTournamentModeActive(true);
-        SceneManager.get().switchTo(
-                "/fxml/setup.fxml",
-                "Memory Match Showdown - Tournament Settings"
-        );
+        SceneManager.get().switchTo("/fxml/setup.fxml", "Memory Match Showdown - Tournament Settings");
     }
 
     private HBox createMatchRow(TournamentMatch match) {
