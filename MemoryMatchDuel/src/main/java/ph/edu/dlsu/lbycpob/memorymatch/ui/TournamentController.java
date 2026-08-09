@@ -56,15 +56,18 @@ public class TournamentController {
 
     @FXML
     private void handleGenerateSchedule() {
-        try {
-            tournamentService.generateBracket();
-            roundHistory.clear();
-            hideError();
-            refreshMatches();
-            refreshHistory();
-        } catch (IllegalStateException ex) {
-            showError(ex.getMessage());
+        if (tournamentService.getRegisteredPlayers().size() < 2) {
+            showError("Need at least 2 registered players to generate a bracket (currently "
+                    + tournamentService.getRegisteredPlayers().size() + ").");
+            return;
         }
+
+        hideError();
+        SceneManager.get().setTournamentModeActive(true);
+        SceneManager.get().switchTo(
+                "/fxml/setup.fxml",
+                "Memory Match Showdown - Tournament Settings"
+        );
     }
 
     private HBox createMatchRow(TournamentMatch match) {
@@ -76,46 +79,33 @@ public class TournamentController {
         vs.getStyleClass().add("match-vs");
         vs.setPrefWidth(260);
 
-        Button playerA = new Button("Win: " + match.getPlayerA());
-        playerA.getStyleClass().addAll("mini-button", "mini-button-green");
+        Button playButton = new Button(
+                match.isPlayed() ? "Winner: " + match.getWinner() : "PLAY"
+        );
+        playButton.getStyleClass().addAll("mini-button", "mini-button-green");
+        playButton.setDisable(match.isPlayed());
 
-        Button playerB = new Button("Win: " + match.getPlayerB());
-        playerB.getStyleClass().addAll("mini-button", "mini-button-blue");
+        playButton.setOnAction(event -> startBracketMatch(match));
 
-        Runnable disableButtons = () -> {
-            playerA.setDisable(true);
-            playerB.setDisable(true);
-        };
-
-        playerA.setOnAction(event -> {
-            if (!match.isPlayed()) {
-                recordWinner(match, match.getPlayerA());
-                disableButtons.run();
-            }
-        });
-
-        playerB.setOnAction(event -> {
-            if (!match.isPlayed()) {
-                recordWinner(match, match.getPlayerB());
-                disableButtons.run();
-            }
-        });
-
-        row.getChildren().addAll(vs, playerA, playerB);
+        row.getChildren().addAll(vs, playButton);
         return row;
     }
 
-    private void recordWinner(TournamentMatch match, String winnerName) {
-        int roundPlayed = match.getRound();
-        String matchup = match.getPlayerA() + " vs " + match.getPlayerB();
+    private void startBracketMatch(TournamentMatch match) {
+        SceneManager manager = SceneManager.get();
 
-        tournamentService.recordMatchWinner(match, winnerName);
+        manager.setActiveTournamentMatch(match);
+        manager.setPendingPlayerNames(List.of(match.getPlayerA(), match.getPlayerB()));
+        manager.resetRoundNumber();
 
-        roundHistory.add("R" + roundPlayed + ": " + matchup + "  →  " + winnerName);
-        refreshHistory();
+        manager.getGameEngine().startNewMatch(
+                manager.getTournamentDifficulty(),
+                manager.getTournamentTheme(),
+                manager.getPendingPlayerNames(),
+                manager.getTournamentBestOf()
+        );
 
-        // Round may have auto-advanced (all matches resolved) — refresh the board
-        refreshMatches();
+        manager.switchTo("/fxml/game_board.fxml", "Memory Match Showdown - Game");
     }
 
     private void refreshMatches() {
