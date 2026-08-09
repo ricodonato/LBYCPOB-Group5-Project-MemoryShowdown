@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 
 import ph.edu.dlsu.lbycpob.memorymatch.model.Player;
 import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngine;
+import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -120,6 +121,27 @@ public class ResultsController {
 
             Player champion =
                     engine.getMatchWinner();
+
+            Player runnerUp =
+                    engine.getLoser();
+
+            LeaderboardService leaderboardService =
+                    SceneManager.get()
+                            .getLeaderboardService();
+
+            if (leaderboardService != null
+                    && champion != null
+                    && runnerUp != null) {
+
+                leaderboardService.recordMatchResult(
+                        champion.getName(),
+                        champion.getScore(),
+                        runnerUp.getName(),
+                        runnerUp.getScore(),
+                        engine.getDifficulty().name(),
+                        engine.getTheme().name()
+                );
+            }
 
             resultTitleLabel.setText(
                     "MATCH COMPLETE"
