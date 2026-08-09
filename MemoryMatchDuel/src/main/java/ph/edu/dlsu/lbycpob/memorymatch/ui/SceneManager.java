@@ -1,5 +1,6 @@
 package ph.edu.dlsu.lbycpob.memorymatch.ui;
 
+
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
@@ -9,6 +10,7 @@ import javafx.stage.Stage;
 
 import ph.edu.dlsu.lbycpob.memorymatch.model.Difficulty;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
+import ph.edu.dlsu.lbycpob.memorymatch.model.TournamentMatch;
 
 import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngine;
 import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngineImpl;
@@ -34,6 +36,26 @@ import java.util.List;
  * the JavaFX lifecycle.
  */
 public class SceneManager {
+    private boolean tournamentModeActive = false;
+    private Difficulty tournamentDifficulty = Difficulty.EASY;
+    private Theme tournamentTheme = Theme.ANIMALS;
+    private int tournamentBestOf = 3;
+    private TournamentMatch activeTournamentMatch;
+
+    public boolean isTournamentModeActive() { return tournamentModeActive; }
+    public void setTournamentModeActive(boolean active) { this.tournamentModeActive = active; }
+
+    public Difficulty getTournamentDifficulty() { return tournamentDifficulty; }
+    public void setTournamentDifficulty(Difficulty difficulty) { this.tournamentDifficulty = difficulty; }
+
+    public Theme getTournamentTheme() { return tournamentTheme; }
+    public void setTournamentTheme(Theme theme) { this.tournamentTheme = theme; }
+
+    public int getTournamentBestOf() { return tournamentBestOf; }
+    public void setTournamentBestOf(int bestOf) { this.tournamentBestOf = bestOf; }
+
+    public TournamentMatch getActiveTournamentMatch() { return activeTournamentMatch; }
+    public void setActiveTournamentMatch(TournamentMatch match) { this.activeTournamentMatch = match; }
 
     private static SceneManager instance;
 

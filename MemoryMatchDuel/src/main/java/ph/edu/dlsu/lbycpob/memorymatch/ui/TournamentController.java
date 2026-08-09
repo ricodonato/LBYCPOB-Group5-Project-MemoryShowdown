@@ -11,339 +11,202 @@ import javafx.scene.layout.VBox;
 import ph.edu.dlsu.lbycpob.memorymatch.model.TournamentMatch;
 import ph.edu.dlsu.lbycpob.memorymatch.service.TournamentService;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class TournamentController {
 
-    @FXML
-    private TextField joinField;
-
-    @FXML
-    private VBox playersContainer;
-
-    @FXML
-    private VBox matchesContainer;
-
-    @FXML
-    private VBox standingsContainer;
-
-    @FXML
-    private Label errorLabel;
+    @FXML private TextField joinField;
+    @FXML private VBox playersContainer;
+    @FXML private VBox matchesContainer;
+    @FXML private VBox standingsContainer;
+    @FXML private Label errorLabel;
 
     private final TournamentService tournamentService =
-            SceneManager.get()
-                    .getTournamentService();
+            SceneManager.get().getTournamentService();
+
+    // Local history log — rebuilt from scratch each time a bracket is generated
+    private final List<String> roundHistory = new ArrayList<>();
 
     @FXML
     private void initialize() {
-
         refreshPlayerList();
-        refreshStandings();
+        refreshMatches();
+        refreshHistory();
     }
 
     @FXML
     private void handleJoin() {
-
-        String name =
-                joinField.getText() == null
-                        ? ""
-                        : joinField.getText()
-                        .trim();
+        String name = joinField.getText() == null ? "" : joinField.getText().trim();
 
         if (name.isEmpty()) {
-
-            showError(
-                    "Enter a player name first."
-            );
-
+            showError("Enter a player name first.");
             return;
         }
-
         if (name.length() > 18) {
-
-            showError(
-                    "Keep tournament names at 18 characters or fewer."
-            );
-
+            showError("Keep tournament names at 18 characters or fewer.");
             return;
         }
 
-        tournamentService.joinTournament(
-                name
-        );
-
+        tournamentService.joinTournament(name);
         joinField.clear();
-
         hideError();
-
         refreshPlayerList();
-        refreshStandings();
     }
 
     @FXML
     private void handleGenerateSchedule() {
-
         try {
-
-            List<TournamentMatch> schedule =
-                    tournamentService
-                            .generateSchedule();
-
-            matchesContainer
-                    .getChildren()
-                    .clear();
-
+            tournamentService.generateBracket();
+            roundHistory.clear();
             hideError();
-
-            for (TournamentMatch match :
-                    schedule) {
-
-                matchesContainer
-                        .getChildren()
-                        .add(
-                                createMatchRow(match)
-                        );
-            }
-
+            refreshMatches();
+            refreshHistory();
         } catch (IllegalStateException ex) {
-
-            showError(
-                    ex.getMessage()
-            );
+            showError(ex.getMessage());
         }
     }
 
-    private HBox createMatchRow(
-            TournamentMatch match
-    ) {
+    private HBox createMatchRow(TournamentMatch match) {
+        HBox row = new HBox(12);
+        row.setAlignment(Pos.CENTER);
+        row.getStyleClass().add("match-row");
 
-        HBox row =
-                new HBox(12);
-
-        row.setAlignment(
-                Pos.CENTER
-        );
-
-        row.getStyleClass()
-                .add("match-row");
-
-        Label vs =
-                new Label(
-                        match.getPlayerA()
-                                + "  VS  "
-                                + match.getPlayerB()
-                );
-
-        vs.getStyleClass()
-                .add("match-vs");
-
+        Label vs = new Label(match.getPlayerA() + "  VS  " + match.getPlayerB());
+        vs.getStyleClass().add("match-vs");
         vs.setPrefWidth(260);
 
-        Button playerA =
-                new Button(
-                        "Win: "
-                                + match.getPlayerA()
-                );
+        Button playerA = new Button("Win: " + match.getPlayerA());
+        playerA.getStyleClass().addAll("mini-button", "mini-button-green");
 
-        playerA.getStyleClass()
-                .addAll(
-                        "mini-button",
-                        "mini-button-green"
-                );
-
-        Button playerB =
-                new Button(
-                        "Win: "
-                                + match.getPlayerB()
-                );
-
-        playerB.getStyleClass()
-                .addAll(
-                        "mini-button",
-                        "mini-button-blue"
-                );
+        Button playerB = new Button("Win: " + match.getPlayerB());
+        playerB.getStyleClass().addAll("mini-button", "mini-button-blue");
 
         Runnable disableButtons = () -> {
-
             playerA.setDisable(true);
             playerB.setDisable(true);
         };
 
-        playerA.setOnAction(
-                event -> {
+        playerA.setOnAction(event -> {
+            if (!match.isPlayed()) {
+                recordWinner(match, match.getPlayerA());
+                disableButtons.run();
+            }
+        });
 
-                    if (!match.isPlayed()) {
+        playerB.setOnAction(event -> {
+            if (!match.isPlayed()) {
+                recordWinner(match, match.getPlayerB());
+                disableButtons.run();
+            }
+        });
 
-                        tournamentService
-                                .recordMatchWinner(
-                                        match,
-                                        match.getPlayerA()
-                                );
-
-                        disableButtons.run();
-                        refreshStandings();
-                    }
-                }
-        );
-
-        playerB.setOnAction(
-                event -> {
-
-                    if (!match.isPlayed()) {
-
-                        tournamentService
-                                .recordMatchWinner(
-                                        match,
-                                        match.getPlayerB()
-                                );
-
-                        disableButtons.run();
-                        refreshStandings();
-                    }
-                }
-        );
-
-        row.getChildren().addAll(
-                vs,
-                playerA,
-                playerB
-        );
-
+        row.getChildren().addAll(vs, playerA, playerB);
         return row;
     }
 
+    private void recordWinner(TournamentMatch match, String winnerName) {
+        int roundPlayed = match.getRound();
+        String matchup = match.getPlayerA() + " vs " + match.getPlayerB();
+
+        tournamentService.recordMatchWinner(match, winnerName);
+
+        roundHistory.add("R" + roundPlayed + ": " + matchup + "  →  " + winnerName);
+        refreshHistory();
+
+        // Round may have auto-advanced (all matches resolved) — refresh the board
+        refreshMatches();
+    }
+
+    private void refreshMatches() {
+        matchesContainer.getChildren().clear();
+
+        if (tournamentService.isTournamentComplete()) {
+            Label championLabel = new Label("🏆 Champion: " + tournamentService.getChampion());
+            championLabel.getStyleClass().add("match-vs");
+            matchesContainer.getChildren().add(championLabel);
+            return;
+        }
+
+        List<TournamentMatch> current = tournamentService.getCurrentRoundMatches();
+
+        if (current.isEmpty()) {
+            Label empty = new Label("Generate a bracket to begin.");
+            empty.getStyleClass().add("muted-label");
+            matchesContainer.getChildren().add(empty);
+            return;
+        }
+
+        Label roundLabel = new Label("ROUND " + tournamentService.getCurrentRoundNumber());
+        roundLabel.getStyleClass().add("small-heading");
+        matchesContainer.getChildren().add(roundLabel);
+
+        for (TournamentMatch match : current) {
+            if (!match.isBye()) {
+                matchesContainer.getChildren().add(createMatchRow(match));
+            }
+        }
+    }
+
     private void refreshPlayerList() {
+        playersContainer.getChildren().clear();
 
-        playersContainer
-                .getChildren()
-                .clear();
-
-        List<String> players =
-                tournamentService
-                        .getRegisteredPlayers();
+        List<String> players = tournamentService.getRegisteredPlayers();
 
         if (players.isEmpty()) {
-
-            Label empty =
-                    new Label(
-                            "No players have joined yet."
-                    );
-
-            empty.getStyleClass()
-                    .add("muted-label");
-
-            playersContainer
-                    .getChildren()
-                    .add(empty);
-
+            Label empty = new Label("No players have joined yet.");
+            empty.getStyleClass().add("muted-label");
+            playersContainer.getChildren().add(empty);
             return;
         }
 
         for (String name : players) {
-
-            Label label =
-                    new Label(
-                            "• " + name
-                    );
-
-            label.getStyleClass()
-                    .add("player-chip");
-
-            playersContainer
-                    .getChildren()
-                    .add(label);
+            Label label = new Label("• " + name);
+            label.getStyleClass().add("player-chip");
+            playersContainer.getChildren().add(label);
         }
     }
 
-    private void refreshStandings() {
+    private void refreshHistory() {
+        standingsContainer.getChildren().clear();
 
-        standingsContainer
-                .getChildren()
-                .clear();
-
-        Map<String, Integer> standings =
-                tournamentService
-                        .getStandings();
-
-        if (standings.isEmpty()) {
-
-            Label empty =
-                    new Label(
-                            "Standings appear after players join."
-                    );
-
-            empty.getStyleClass()
-                    .add("muted-label");
-
-            standingsContainer
-                    .getChildren()
-                    .add(empty);
-
+        if (roundHistory.isEmpty()) {
+            Label empty = new Label("Match results will appear here.");
+            empty.getStyleClass().add("muted-label");
+            standingsContainer.getChildren().add(empty);
             return;
         }
 
-        int rank = 1;
-
-        for (Map.Entry<String, Integer>
-                entry : standings.entrySet()) {
-
-            Label label =
-                    new Label(
-                            "#"
-                                    + rank++
-                                    + "   "
-                                    + entry.getKey()
-                                    + "   •   "
-                                    + entry.getValue()
-                                    + " win(s)"
-                    );
-
-            label.getStyleClass()
-                    .add("standing-row");
-
-            standingsContainer
-                    .getChildren()
-                    .add(label);
+        for (String entry : roundHistory) {
+            Label label = new Label(entry);
+            label.getStyleClass().add("standing-row");
+            standingsContainer.getChildren().add(label);
         }
     }
 
     @FXML
     private void handleReset() {
-
-        tournamentService
-                .resetTournament();
-
-        matchesContainer
-                .getChildren()
-                .clear();
-
+        tournamentService.resetTournament();
+        roundHistory.clear();
         refreshPlayerList();
-        refreshStandings();
+        refreshMatches();
+        refreshHistory();
         hideError();
     }
 
-    private void showError(
-            String message
-    ) {
-
+    private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.setManaged(true);
     }
 
     private void hideError() {
-
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
     }
 
     @FXML
     private void handleBack() {
-
-        SceneManager.get().switchTo(
-                "/fxml/welcome.fxml",
-                "Memory Match Showdown"
-        );
+        SceneManager.get().switchTo("/fxml/welcome.fxml", "Memory Match Showdown");
     }
 }
