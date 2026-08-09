@@ -3,24 +3,20 @@ package ph.edu.dlsu.lbycpob.memorymatch.service;
 import ph.edu.dlsu.lbycpob.memorymatch.model.TournamentMatch;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-/**
- * PERSON A (Game Logic) OWNS THIS FILE.
- * Simple round-robin: every registered player faces every other player once.
- */
 public class TournamentServiceImpl implements TournamentService {
 
     private final List<String> registeredPlayers = new ArrayList<>();
-    private final Map<String, Integer> wins = new LinkedHashMap<>();
+    private List<TournamentMatch> currentRoundMatches = new ArrayList<>();
+    private int currentRound = 0;
+    private String champion;
 
     @Override
     public void joinTournament(String playerName) {
         if (!registeredPlayers.contains(playerName)) {
             registeredPlayers.add(playerName);
-            wins.put(playerName, 0);
         }
     }
 
@@ -30,39 +26,94 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
-    public List<TournamentMatch> generateSchedule() {
+    public void generateBracket() {
         if (registeredPlayers.size() < 2) {
             throw new IllegalStateException(
-                    "Need at least 2 registered players to generate a tournament schedule (currently "
+                    "Need at least 2 registered players to generate a bracket (currently "
                             + registeredPlayers.size() + ").");
         }
-        List<TournamentMatch> schedule = new ArrayList<>();
-        for (int i = 0; i < registeredPlayers.size(); i++) {
-            for (int j = i + 1; j < registeredPlayers.size(); j++) {
-                schedule.add(new TournamentMatch(registeredPlayers.get(i), registeredPlayers.get(j)));
-            }
+
+        List<String> shuffled = new ArrayList<>(registeredPlayers);
+        Collections.shuffle(shuffled);
+
+        int bracketSize = 1;
+        while (bracketSize < shuffled.size()) {
+            bracketSize *= 2;
         }
-        return schedule;
+        while (shuffled.size() < bracketSize) {
+            shuffled.add(null); // bye
+        }
+
+        currentRound = 1;
+        champion = null;
+        currentRoundMatches = new ArrayList<>();
+        for (int i = 0; i < shuffled.size(); i += 2) {
+            currentRoundMatches.add(new TournamentMatch(shuffled.get(i), shuffled.get(i + 1), currentRound));
+        }
+
+        resolveByesAndAdvance();
+    }
+
+    @Override
+    public List<TournamentMatch> getCurrentRoundMatches() {
+        return currentRoundMatches;
+    }
+
+    @Override
+    public int getCurrentRoundNumber() {
+        return currentRound;
     }
 
     @Override
     public void recordMatchWinner(TournamentMatch match, String winnerName) {
         match.setWinner(winnerName);
-        wins.merge(winnerName, 1, Integer::sum);
+        resolveByesAndAdvance();
+    }
+
+    private void resolveByesAndAdvance() {
+        for (TournamentMatch match : currentRoundMatches) {
+            if (match.isBye() && !match.isPlayed()) {
+                match.setWinner(match.getPlayerA() != null ? match.getPlayerA() : match.getPlayerB());
+            }
+        }
+
+        boolean roundComplete = currentRoundMatches.stream().allMatch(TournamentMatch::isPlayed);
+        if (!roundComplete) {
+            return;
+        }
+
+        List<String> winners = currentRoundMatches.stream().map(TournamentMatch::getWinner).toList();
+
+        if (winners.size() == 1) {
+            champion = winners.get(0);
+            return;
+        }
+
+        currentRound++;
+        List<TournamentMatch> nextRound = new ArrayList<>();
+        for (int i = 0; i < winners.size(); i += 2) {
+            nextRound.add(new TournamentMatch(winners.get(i), winners.get(i + 1), currentRound));
+        }
+        currentRoundMatches = nextRound;
+
+        resolveByesAndAdvance(); // in case the next round is also all byes
     }
 
     @Override
-    public Map<String, Integer> getStandings() {
-        Map<String, Integer> sorted = new LinkedHashMap<>();
-        wins.entrySet().stream()
-                .sorted((a, b) -> b.getValue() - a.getValue())
-                .forEach(e -> sorted.put(e.getKey(), e.getValue()));
-        return sorted;
+    public boolean isTournamentComplete() {
+        return champion != null;
+    }
+
+    @Override
+    public String getChampion() {
+        return champion;
     }
 
     @Override
     public void resetTournament() {
         registeredPlayers.clear();
-        wins.clear();
+        currentRoundMatches.clear();
+        currentRound = 0;
+        champion = null;
     }
 }
