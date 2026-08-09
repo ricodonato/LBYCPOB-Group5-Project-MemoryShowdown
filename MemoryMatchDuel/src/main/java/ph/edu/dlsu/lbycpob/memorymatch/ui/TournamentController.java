@@ -25,14 +25,10 @@ public class TournamentController {
     private final TournamentService tournamentService =
             SceneManager.get().getTournamentService();
 
-    // Local history log — rebuilt from scratch each time a bracket is generated
-    private final List<String> roundHistory = new ArrayList<>();
-
     @FXML
     private void initialize() {
         refreshPlayerList();
         refreshMatches();
-        refreshHistory();
     }
 
     @FXML
@@ -157,30 +153,25 @@ public class TournamentController {
         }
     }
 
-    private void refreshHistory() {
+    private void refreshStatus() {
         standingsContainer.getChildren().clear();
 
-        if (roundHistory.isEmpty()) {
-            Label empty = new Label("Match results will appear here.");
-            empty.getStyleClass().add("muted-label");
-            standingsContainer.getChildren().add(empty);
-            return;
-        }
+        String text = tournamentService.isTournamentComplete()
+                ? "Tournament complete!"
+                : tournamentService.getCurrentRoundNumber() == 0
+                  ? "Waiting for bracket to be generated."
+                  : "Currently on Round " + tournamentService.getCurrentRoundNumber();
 
-        for (String entry : roundHistory) {
-            Label label = new Label(entry);
-            label.getStyleClass().add("standing-row");
-            standingsContainer.getChildren().add(label);
-        }
+        Label label = new Label(text);
+        label.getStyleClass().add("standing-row");
+        standingsContainer.getChildren().add(label);
     }
 
     @FXML
     private void handleReset() {
         tournamentService.resetTournament();
-        roundHistory.clear();
         refreshPlayerList();
         refreshMatches();
-        refreshHistory();
         hideError();
     }
 
