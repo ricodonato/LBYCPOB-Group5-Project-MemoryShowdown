@@ -7,6 +7,8 @@ public class WelcomeController {
     @FXML
     private void handlePlay() {
 
+        SceneManager.get().setTournamentModeActive(false);
+
         SceneManager.get().switchTo(
                 "/fxml/name_entry.fxml",
                 "Memory Match Showdown - Players"

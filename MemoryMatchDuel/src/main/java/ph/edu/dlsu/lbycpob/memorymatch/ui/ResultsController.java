@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
+import ph.edu.dlsu.lbycpob.memorymatch.model.TournamentMatch;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Player;
 import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngine;
 import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
@@ -12,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class ResultsController {
+    private boolean cameFromTournament;
 
     @FXML
     private Label resultTitleLabel;
@@ -141,6 +143,15 @@ public class ResultsController {
                         engine.getDifficulty().name(),
                         engine.getTheme().name()
                 );
+
+                TournamentMatch activeMatch = SceneManager.get().getActiveTournamentMatch();
+                cameFromTournament = activeMatch != null;
+
+                if (activeMatch != null && champion != null) {
+                    SceneManager.get().getTournamentService()
+                            .recordMatchWinner(activeMatch, champion.getName());
+                    SceneManager.get().setActiveTournamentMatch(null);
+                }
             }
 
             resultTitleLabel.setText(
@@ -156,15 +167,15 @@ public class ResultsController {
             );
 
             statusLabel.setText(
-                    "Best-of-"
-                            + SceneManager.get()
-                            .getPendingBestOf()
-                            + " series complete"
+                    cameFromTournament
+                            ? "Tournament bracket match complete"
+                            : "Best-of-" + SceneManager.get().getPendingBestOf() + " series complete"
             );
 
             nextRoundButton.setVisible(false);
             nextRoundButton.setManaged(false);
 
+            newMatchButton.setText(cameFromTournament ? "Back to Tournament" : "New Match");
             newMatchButton.setVisible(true);
             newMatchButton.setManaged(true);
 
@@ -234,11 +245,11 @@ public class ResultsController {
 
     @FXML
     private void handleNewMatch() {
-
-        SceneManager.get().switchTo(
-                "/fxml/setup.fxml",
-                "Memory Match Showdown - Setup"
-        );
+        if (cameFromTournament) {
+            SceneManager.get().switchTo("/fxml/tournament.fxml", "Memory Match Showdown - Tournament");
+        } else {
+            SceneManager.get().switchTo("/fxml/setup.fxml", "Memory Match Showdown - Setup");
+        }
     }
 
     @FXML

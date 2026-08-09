@@ -25,14 +25,10 @@ public class TournamentController {
     private final TournamentService tournamentService =
             SceneManager.get().getTournamentService();
 
-    // Local history log — rebuilt from scratch each time a bracket is generated
-    private final List<String> roundHistory = new ArrayList<>();
-
     @FXML
     private void initialize() {
         refreshPlayerList();
         refreshMatches();
-        refreshHistory();
     }
 
     @FXML
@@ -56,18 +52,21 @@ public class TournamentController {
 
     @FXML
     private void handleGenerateSchedule() {
-        if (tournamentService.getRegisteredPlayers().size() < 2) {
-            showError("Need at least 2 registered players to generate a bracket (currently "
-                    + tournamentService.getRegisteredPlayers().size() + ").");
+        int count = tournamentService.getRegisteredPlayers().size();
+
+        if (count < 2) {
+            showError("Need at least 2 registered players to generate a bracket (currently " + count + ").");
+            return;
+        }
+
+        if (count % 2 != 0) {
+            showError("Bracket needs an even number of players (currently " + count + "). Add one more or remove one.");
             return;
         }
 
         hideError();
         SceneManager.get().setTournamentModeActive(true);
-        SceneManager.get().switchTo(
-                "/fxml/setup.fxml",
-                "Memory Match Showdown - Tournament Settings"
-        );
+        SceneManager.get().switchTo("/fxml/setup.fxml", "Memory Match Showdown - Tournament Settings");
     }
 
     private HBox createMatchRow(TournamentMatch match) {
@@ -157,30 +156,25 @@ public class TournamentController {
         }
     }
 
-    private void refreshHistory() {
+    private void refreshStatus() {
         standingsContainer.getChildren().clear();
 
-        if (roundHistory.isEmpty()) {
-            Label empty = new Label("Match results will appear here.");
-            empty.getStyleClass().add("muted-label");
-            standingsContainer.getChildren().add(empty);
-            return;
-        }
+        String text = tournamentService.isTournamentComplete()
+                ? "Tournament complete!"
+                : tournamentService.getCurrentRoundNumber() == 0
+                  ? "Waiting for bracket to be generated."
+                  : "Currently on Round " + tournamentService.getCurrentRoundNumber();
 
-        for (String entry : roundHistory) {
-            Label label = new Label(entry);
-            label.getStyleClass().add("standing-row");
-            standingsContainer.getChildren().add(label);
-        }
+        Label label = new Label(text);
+        label.getStyleClass().add("standing-row");
+        standingsContainer.getChildren().add(label);
     }
 
     @FXML
     private void handleReset() {
         tournamentService.resetTournament();
-        roundHistory.clear();
         refreshPlayerList();
         refreshMatches();
-        refreshHistory();
         hideError();
     }
 
