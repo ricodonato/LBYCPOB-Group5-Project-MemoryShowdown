@@ -94,21 +94,9 @@ public class GameEngineImpl implements GameEngine {
 
         if (playersAtHighScore.size() == 1) {
             playersAtHighScore.get(0).registerRoundWin();
-            return;
         }
-
-        int fewestMisses = playersAtHighScore.stream()
-                .mapToInt(Player::getMissCount)
-                .min()
-                .orElse(0);
-
-        List<Player> tiebreakWinners = playersAtHighScore.stream()
-                .filter(p -> p.getMissCount() == fewestMisses)
-                .toList();
-
-        if (tiebreakWinners.size() == 1) {
-            tiebreakWinners.get(0).registerRoundWin();
-        }
+        // If more than one player is at the highest score, it's a genuine tie —
+        // no round win is awarded, matching what the results screen displays.
     }
 
     private void advanceTurn() {

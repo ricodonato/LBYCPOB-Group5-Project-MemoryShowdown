@@ -12,6 +12,7 @@ import javafx.util.Duration;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Card;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Difficulty;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Player;
+import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngine;
 
 import java.util.HashMap;
@@ -29,6 +30,18 @@ public class GameBoardController {
     private final Map<Integer, Button> cardButtons = new HashMap<>();
     private final Map<String, PlayerPanel> scorePanels = new HashMap<>();
     private boolean awaitingResolve;
+
+    private Theme activeTheme() {
+        return SceneManager.get().isTournamentModeActive()
+                ? SceneManager.get().getTournamentTheme()
+                : SceneManager.get().getPendingTheme();
+    }
+
+    private Difficulty activeDifficulty() {
+        return SceneManager.get().isTournamentModeActive()
+                ? SceneManager.get().getTournamentDifficulty()
+                : SceneManager.get().getPendingDifficulty();
+    }
 
     @FXML
     private void initialize() {
@@ -69,8 +82,7 @@ public class GameBoardController {
         cardGrid.getChildren().clear();
         cardButtons.clear();
 
-        Difficulty difficulty =
-                SceneManager.get().getPendingDifficulty();
+        Difficulty difficulty = activeDifficulty();
 
         double cardSize;
         double wrapLength;
@@ -265,13 +277,9 @@ public class GameBoardController {
                         + " round win"
                         + (firstTo == 1 ? "" : "s")
                         + "  |  "
-                        + SceneManager.get()
-                        .getPendingDifficulty()
-                        .name()
+                        + activeDifficulty().name()
                         + "  |  "
-                        + SceneManager.get()
-                        .getPendingTheme()
-                        .name()
+                        + activeTheme().name()
         );
     }
 
@@ -306,6 +314,9 @@ public class GameBoardController {
 
     @FXML
     private void handleQuitMatch() {
+
+        SceneManager.get().setTournamentModeActive(false);
+        SceneManager.get().setActiveTournamentMatch(null);
 
         SceneManager.get().switchTo(
                 "/fxml/welcome.fxml",
