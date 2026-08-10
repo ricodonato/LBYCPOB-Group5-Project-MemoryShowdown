@@ -85,7 +85,9 @@
 }
 
 .hero-icons {
+    -fx-font-family: "Segoe UI Emoji";
     -fx-font-size: 30px;
+    -fx-font-weight: normal;
     -fx-padding: 8 0 0 0;
 }
 
@@ -400,8 +402,10 @@
 
     -fx-text-fill: white;
 
-    -fx-font-size: 28px;
-    -fx-font-weight: 900;
+    /* FIX: Use Windows emoji font for card symbols */
+    -fx-font-family: "Segoe UI Emoji";
+    -fx-font-size: 32px;
+    -fx-font-weight: normal;
 
     -fx-effect:
             dropshadow(
