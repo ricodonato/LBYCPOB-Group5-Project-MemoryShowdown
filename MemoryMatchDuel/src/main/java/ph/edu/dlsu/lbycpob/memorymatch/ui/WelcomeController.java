@@ -2,7 +2,12 @@ package ph.edu.dlsu.lbycpob.memorymatch.ui;
 
 import javafx.fxml.FXML;
 
-public class WelcomeController {
+public class WelcomeController extends BaseScreenController {
+
+    @Override
+    protected void onScreenReady() {
+        // Nothing to set up when the Welcome screen loads.
+    }
 
     @FXML
     private void handlePlay() {

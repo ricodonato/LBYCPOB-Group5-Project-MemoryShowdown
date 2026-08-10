@@ -18,7 +18,7 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.GameEngine;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GameBoardController {
+public class GameBoardController extends BaseScreenController {
 
     @FXML private FlowPane cardGrid;
     @FXML private HBox scorePanelContainer;
@@ -43,8 +43,8 @@ public class GameBoardController {
                 : SceneManager.get().getPendingDifficulty();
     }
 
-    @FXML
-    private void initialize() {
+    @Override
+    protected void onScreenReady() {
         buildScorePanels();
         buildCardGrid();
         refreshHeader();
@@ -318,10 +318,7 @@ public class GameBoardController {
         SceneManager.get().setTournamentModeActive(false);
         SceneManager.get().setActiveTournamentMatch(null);
 
-        SceneManager.get().switchTo(
-                "/fxml/welcome.fxml",
-                "Memory Match Showdown"
-        );
+        goToWelcome();
     }
 
     private record PlayerPanel(

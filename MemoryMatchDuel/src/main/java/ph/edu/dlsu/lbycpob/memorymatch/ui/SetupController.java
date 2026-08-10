@@ -7,7 +7,7 @@ import javafx.scene.control.ToggleButton;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Difficulty;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 
-public class SetupController {
+public class SetupController extends BaseScreenController {
 
     @FXML
     private ToggleButton easyToggle;
@@ -42,8 +42,8 @@ public class SetupController {
     @FXML
     private Label playersLabel;
 
-    @FXML
-    private void initialize() {
+    @Override
+    protected void onScreenReady() {
         if (SceneManager.get().isTournamentModeActive()) {
             playersLabel.setText("Choose the match settings for this tournament.");
         } else {

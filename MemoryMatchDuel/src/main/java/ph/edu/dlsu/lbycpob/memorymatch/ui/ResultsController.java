@@ -12,7 +12,7 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
 import java.util.Comparator;
 import java.util.List;
 
-public class ResultsController {
+public class ResultsController extends BaseScreenController {
     private boolean cameFromTournament;
 
     @FXML
@@ -40,8 +40,8 @@ public class ResultsController {
             SceneManager.get()
                     .getGameEngine();
 
-    @FXML
-    private void initialize() {
+    @Override
+    protected void onScreenReady() {
 
         List<Player> players =
                 engine.getPlayers();
@@ -263,10 +263,6 @@ public class ResultsController {
 
     @FXML
     private void handleMainMenu() {
-
-        SceneManager.get().switchTo(
-                "/fxml/welcome.fxml",
-                "Memory Match Showdown"
-        );
+        goToWelcome();
     }
 }

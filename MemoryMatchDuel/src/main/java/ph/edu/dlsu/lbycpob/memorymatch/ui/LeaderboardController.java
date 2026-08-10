@@ -11,7 +11,7 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
 
 import java.util.List;
 
-public class LeaderboardController {
+public class LeaderboardController extends BaseScreenController {
 
     @FXML
     private VBox rowsContainer;
@@ -19,8 +19,8 @@ public class LeaderboardController {
     @FXML
     private Label connectionLabel;
 
-    @FXML
-    private void initialize() {
+    @Override
+    protected void onScreenReady() {
 
         rowsContainer.getChildren().clear();
 
@@ -127,10 +127,6 @@ public class LeaderboardController {
 
     @FXML
     private void handleBack() {
-
-        SceneManager.get().switchTo(
-                "/fxml/welcome.fxml",
-                "Memory Match Showdown"
-        );
+        goToWelcome();
     }
 }

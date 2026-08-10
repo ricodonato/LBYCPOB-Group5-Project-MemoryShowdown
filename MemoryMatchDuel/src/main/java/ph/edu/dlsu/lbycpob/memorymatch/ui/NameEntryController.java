@@ -6,7 +6,7 @@ import javafx.scene.control.TextField;
 
 import java.util.List;
 
-public class NameEntryController {
+public class NameEntryController extends BaseScreenController {
 
     @FXML
     private TextField player1Field;
@@ -17,8 +17,8 @@ public class NameEntryController {
     @FXML
     private Label errorLabel;
 
-    @FXML
-    private void initialize() {
+    @Override
+    protected void onScreenReady() {
 
         List<String> current =
                 SceneManager.get()
@@ -48,6 +48,7 @@ public class NameEntryController {
         if (p1.isEmpty() || p2.isEmpty()) {
 
             showError(
+                    errorLabel,
                     "Enter a name for both players."
             );
 
@@ -57,6 +58,7 @@ public class NameEntryController {
         if (p1.equalsIgnoreCase(p2)) {
 
             showError(
+                    errorLabel,
                     "Player names must be different."
             );
 
@@ -67,13 +69,14 @@ public class NameEntryController {
                 || p2.length() > 18) {
 
             showError(
+                    errorLabel,
                     "Keep each player name at 18 characters or fewer."
             );
 
             return;
         }
 
-        errorLabel.setVisible(false);
+        hideError(errorLabel);
 
         SceneManager.get()
                 .setPendingPlayerNames(
@@ -93,19 +96,8 @@ public class NameEntryController {
                 : value.trim();
     }
 
-    private void showError(String message) {
-
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        errorLabel.setManaged(true);
-    }
-
     @FXML
     private void handleBack() {
-
-        SceneManager.get().switchTo(
-                "/fxml/welcome.fxml",
-                "Memory Match Showdown"
-        );
+        goToWelcome();
     }
 }

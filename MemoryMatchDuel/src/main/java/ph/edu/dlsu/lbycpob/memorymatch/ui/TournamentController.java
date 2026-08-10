@@ -14,7 +14,7 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.TournamentService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TournamentController {
+public class TournamentController extends BaseScreenController {
 
     @FXML private TextField joinField;
     @FXML private VBox playersContainer;
@@ -25,8 +25,8 @@ public class TournamentController {
     private final TournamentService tournamentService =
             SceneManager.get().getTournamentService();
 
-    @FXML
-    private void initialize() {
+    @Override
+    protected void onScreenReady() {
         refreshPlayerList();
         refreshMatches();
     }
@@ -36,17 +36,17 @@ public class TournamentController {
         String name = joinField.getText() == null ? "" : joinField.getText().trim();
 
         if (name.isEmpty()) {
-            showError("Enter a player name first.");
+            showError(errorLabel, "Enter a player name first.");
             return;
         }
         if (name.length() > 18) {
-            showError("Keep tournament names at 18 characters or fewer.");
+            showError(errorLabel, "Keep tournament names at 18 characters or fewer.");
             return;
         }
 
         tournamentService.joinTournament(name);
         joinField.clear();
-        hideError();
+        hideError(errorLabel);
         refreshPlayerList();
     }
 
@@ -55,16 +55,16 @@ public class TournamentController {
         int count = tournamentService.getRegisteredPlayers().size();
 
         if (count < 2) {
-            showError("Need at least 2 registered players to generate a bracket (currently " + count + ").");
+            showError(errorLabel, "Need at least 2 registered players to generate a bracket (currently " + count + ").");
             return;
         }
 
         if (count % 2 != 0) {
-            showError("Bracket needs an even number of players (currently " + count + "). Add one more or remove one.");
+            showError(errorLabel, "Bracket needs an even number of players (currently " + count + "). Add one more or remove one.");
             return;
         }
 
-        hideError();
+        hideError(errorLabel);
         SceneManager.get().setTournamentModeActive(true);
         SceneManager.get().switchTo("/fxml/setup.fxml", "Memory Match Showdown - Tournament Settings");
     }
@@ -175,22 +175,11 @@ public class TournamentController {
         tournamentService.resetTournament();
         refreshPlayerList();
         refreshMatches();
-        hideError();
-    }
-
-    private void showError(String message) {
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        errorLabel.setManaged(true);
-    }
-
-    private void hideError() {
-        errorLabel.setVisible(false);
-        errorLabel.setManaged(false);
+        hideError(errorLabel);
     }
 
     @FXML
     private void handleBack() {
-        SceneManager.get().switchTo("/fxml/welcome.fxml", "Memory Match Showdown");
+        goToWelcome();
     }
 }
