@@ -10,9 +10,10 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
-/**
- * PERSON C (Backend/DB) OWNS THIS FILE.
- */
+// UNDERSTAND: The real, database-backed implementation of LeaderboardService — talks to the two JPA
+// repositories to read and write player/match data.
+// DECISION: @Service + constructor @Autowired was used instead of manually creating this object, so
+// Spring Boot can inject the repository dependencies automatically and manage this as a singleton bean.
 @Service
 public class LeaderboardServiceImpl implements LeaderboardService {
 
@@ -31,10 +32,15 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         return playerRepository.findAllByOrderByHighestScoreDesc(PageRequest.of(0, limit));
     }
 
+    // UNDERSTAND: recordMatchResult() looks up (or creates) both players, updates their running totals,
+    // saves them, then saves a new MatchResultEntity row for this match.
+    // DECISION: findOrCreatePlayer() is called for both winner and loser instead of assuming they
+    // already exist in the database, so a brand-new player who's never played before doesn't cause a
+    // lookup failure.
     @Override
     public void recordMatchResult(String winnerName, int winnerScore,
-                                   String loserName, int loserScore,
-                                   String difficulty, String theme) {
+                                  String loserName, int loserScore,
+                                  String difficulty, String theme) {
         PlayerEntity winner = findOrCreatePlayer(winnerName);
         PlayerEntity loser = findOrCreatePlayer(loserName);
 
@@ -58,6 +64,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         matchResultRepository.save(result);
     }
 
+    // UNDERSTAND: findOrCreatePlayer() returns the existing PlayerEntity for a username, or creates and
+    // saves a brand-new one if it doesn't exist yet.
+    // DECISION: Optional.orElseGet() was used instead of an if/else null-check, because it only runs the
+    // "create a new player" logic when actually needed, rather than always constructing one upfront.
     @Override
     public PlayerEntity findOrCreatePlayer(String username) {
         return playerRepository.findByUsername(username)

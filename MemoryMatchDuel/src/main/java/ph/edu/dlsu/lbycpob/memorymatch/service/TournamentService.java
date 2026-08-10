@@ -4,6 +4,11 @@ import ph.edu.dlsu.lbycpob.memorymatch.model.TournamentMatch;
 
 import java.util.List;
 
+// UNDERSTAND: Defines the contract for managing a single-elimination tournament — registering players,
+// building the bracket, and recording match winners round by round.
+// DECISION: This was kept as its own interface separate from GameEngine because a tournament is a
+// higher-level structure (a series of matches between many players) while GameEngine only handles the
+// mechanics of one single game/round.
 public interface TournamentService {
 
     void joinTournament(String playerName);

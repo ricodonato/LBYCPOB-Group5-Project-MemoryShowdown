@@ -2,6 +2,11 @@ package ph.edu.dlsu.lbycpob.memorymatch.entity;
 
 import jakarta.persistence.*;
 
+// UNDERSTAND: A JPA entity that records the outcome of one finished match — who won, who lost, both
+// scores, and the difficulty/theme played — as a row in the "match_results" table.
+// DECISION: winner and loser were stored as @ManyToOne references to PlayerEntity instead of plain
+// String names, so the database keeps a real relationship between a match result and the actual player
+// row, instead of a loose text copy that could drift out of sync (e.g. after a username change).
 @Entity
 @Table(name = "match_results")
 public class MatchResultEntity {

@@ -7,10 +7,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import ph.edu.dlsu.lbycpob.memorymatch.MemoryShowdownApplication;
 import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
 
-/**
- * JavaFX entry point for
- * Memory Match Showdown.
- */
+// UNDERSTAND: The actual JavaFX Application class — init() starts up the Spring backend before any UI
+// shows, start() opens the first screen, and stop() shuts the backend down cleanly on exit.
+// DECISION: Spring Boot is started inside init() instead of start(), because init() runs off the JavaFX
+// Application Thread — this means the (potentially slow) database connection setup doesn't freeze or
+// delay the UI from appearing.
 public class MainApp extends Application {
 
     private ConfigurableApplicationContext springContext;

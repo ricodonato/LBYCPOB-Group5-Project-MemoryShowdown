@@ -11,6 +11,10 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
 
 import java.util.List;
 
+// UNDERSTAND: Controls the leaderboard screen — pulls the top players from LeaderboardService and
+// builds a row of labels for each one manually in code (no FXML rows).
+// DECISION: The rows are built dynamically in Java (new HBox/Label per player) instead of hardcoding
+// FXML rows, because the number of players on the leaderboard isn't known ahead of time.
 public class LeaderboardController extends BaseScreenController {
 
     @FXML
@@ -19,6 +23,11 @@ public class LeaderboardController extends BaseScreenController {
     @FXML
     private Label connectionLabel;
 
+    // UNDERSTAND: onScreenReady() first checks if a LeaderboardService is even connected (it can be
+    // null before the backend teammate's Spring bean is wired up); if so it shows a message instead of
+    // crashing. Otherwise it fetches and renders the top 10 players.
+    // DECISION: A null check on the service was added instead of assuming it's always present, because
+    // this UI screen can be run before the backend integration is finished.
     @Override
     protected void onScreenReady() {
 
