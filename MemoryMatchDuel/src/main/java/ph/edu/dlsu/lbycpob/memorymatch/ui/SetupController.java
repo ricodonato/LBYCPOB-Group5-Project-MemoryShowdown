@@ -7,6 +7,8 @@ import javafx.scene.control.ToggleButton;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Difficulty;
 import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 
+// UNDERSTAND: Handles the screen where difficulty, theme, and best-of length are chosen before a match
+// starts, using toggle buttons instead of dropdowns.
 public class SetupController extends BaseScreenController {
 
     @FXML
@@ -42,6 +44,8 @@ public class SetupController extends BaseScreenController {
     @FXML
     private Label playersLabel;
 
+    // UNDERSTAND: onScreenReady() shows a different heading depending on whether this setup screen was
+    // reached from a normal match or from a tournament bracket match.
     @Override
     protected void onScreenReady() {
         if (SceneManager.get().isTournamentModeActive()) {
@@ -53,6 +57,12 @@ public class SetupController extends BaseScreenController {
         }
     }
 
+    // UNDERSTAND: handleStart() reads which toggle is selected for difficulty, theme, and best-of,
+    // defaulting to EASY / ANIMALS / best-of-3 if nothing was picked, then either starts a tournament
+    // bracket match or a regular match depending on the current mode.
+    // DECISION: Each toggle group was checked with a series of if-statements instead of a switch on an
+    // enum, since ToggleButtons don't carry their own enum value — this was the simplest way to map a
+    // selected button back to a Difficulty/Theme/int.
     @FXML
     private void handleStart() {
 
@@ -103,4 +113,3 @@ public class SetupController extends BaseScreenController {
         );
     }
 }
-

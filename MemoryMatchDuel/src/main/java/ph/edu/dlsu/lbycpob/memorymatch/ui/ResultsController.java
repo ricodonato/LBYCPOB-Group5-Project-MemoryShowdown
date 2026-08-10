@@ -12,6 +12,8 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.LeaderboardService;
 import java.util.Comparator;
 import java.util.List;
 
+// UNDERSTAND: Controls the results screen shown after every round — displays who won the round, or if
+// the whole match/series just finished, shows the champion and records the result to the leaderboard.
 public class ResultsController extends BaseScreenController {
     private boolean cameFromTournament;
 
@@ -40,6 +42,13 @@ public class ResultsController extends BaseScreenController {
             SceneManager.get()
                     .getGameEngine();
 
+    // UNDERSTAND: onScreenReady() figures out this round's winner by sorting players by score and
+    // checking if exactly one player is at the top (a tie means no round winner), builds the score/wins
+    // summary strings, then branches into two very different layouts depending on whether the whole
+    // match is over or just this round.
+    // DECISION: atHighest (a count of how many players share the top score) was used instead of just
+    // comparing the top two scores, so this logic still works correctly if more than 2 players are ever
+    // added later.
     @Override
     protected void onScreenReady() {
 
@@ -61,7 +70,7 @@ public class ResultsController extends BaseScreenController {
                 byScore.isEmpty()
                         ? 0
                         : byScore.get(0)
-                        .getScore();
+                          .getScore();
 
         long atHighest =
                 players.stream()
@@ -119,6 +128,13 @@ public class ResultsController extends BaseScreenController {
                         .orElse("")
         );
 
+        // UNDERSTAND: When the whole match is over, this block records the final result to the
+        // leaderboard and, if this match came from a tournament bracket, reports the winner back to the
+        // TournamentService so the bracket can advance.
+        // DECISION: The leaderboard write and tournament-advance calls are both guarded by
+        // "leaderboardService != null" / "activeMatch != null" checks instead of assuming they're always
+        // present, since a match can be played without a leaderboard connected, and without being part
+        // of a tournament.
         if (engine.isMatchOver()) {
 
             Player champion =
@@ -243,6 +259,8 @@ public class ResultsController extends BaseScreenController {
         );
     }
 
+    // UNDERSTAND: handleNewMatch() routes back to either the tournament screen or the regular setup
+    // screen, depending on whether this finished match was a bracket match.
     @FXML
     private void handleNewMatch() {
         if (cameFromTournament) {

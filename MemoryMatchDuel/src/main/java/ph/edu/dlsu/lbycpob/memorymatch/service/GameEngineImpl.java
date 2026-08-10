@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+// UNDERSTAND: This is the real implementation of GameEngine — it holds the actual board, players, and
+// turn state, and applies the rules for flipping, matching, and scoring.
 public class GameEngineImpl implements GameEngine {
 
     private Board board;
@@ -19,6 +21,10 @@ public class GameEngineImpl implements GameEngine {
     private Theme matchTheme;
     private int roundsToWin = 1;
 
+    // UNDERSTAND: startNewRound() validates the player names first, then builds a fresh Board and a new
+    // list of Player objects, and resets whose turn it is.
+    // DECISION: validatePlayerNames() was pulled out into its own private method instead of inlining the
+    // checks, because it's reused by both startNewRound() and startNewMatch().
     @Override
     public void startNewRound(Difficulty difficulty, Theme theme, List<String> playerNames) {
         validatePlayerNames(playerNames);
@@ -32,6 +38,10 @@ public class GameEngineImpl implements GameEngine {
         this.secondFlipped = null;
     }
 
+    // UNDERSTAND: flipCard() only allows a card to be flipped if it isn't already matched or face up, and
+    // blocks a 3rd flip while two cards are already waiting to be checked.
+    // DECISION: firstFlipped/secondFlipped were used as two separate fields instead of a list, since the
+    // game rule only ever needs exactly two cards flipped at a time before resolving them.
     @Override
     public Card flipCard(int cardId) {
         Card card = board.getCardById(cardId);
@@ -51,6 +61,11 @@ public class GameEngineImpl implements GameEngine {
         return card;
     }
 
+    // UNDERSTAND: checkMatch() compares the two flipped cards. If they match, both stay face up and the
+    // current player scores and goes again. If not, both flip back down and the turn passes to the next
+    // player.
+    // DECISION: The matching player is allowed to keep their turn (no call to advanceTurn() in the matched
+    // branch) because that's the standard memory-game rule — finding a pair earns you another turn.
     @Override
     public boolean checkMatch() {
         if (firstFlipped == null || secondFlipped == null) {
@@ -82,6 +97,10 @@ public class GameEngineImpl implements GameEngine {
     }
 
     /** Credits the player with the highest score this round with a round win. */
+    // UNDERSTAND: registerRoundWinner() finds whoever has the highest score once the board is fully matched
+    // and gives them a round win.
+    // DECISION: If more than one player is tied for the highest score, no one is given the round win
+    // instead of picking one arbitrarily, because a tie shouldn't unfairly favor either player.
     private void registerRoundWinner() {
         int highestScore = players.stream()
                 .mapToInt(Player::getScore)
@@ -99,6 +118,10 @@ public class GameEngineImpl implements GameEngine {
         // no round win is awarded, matching what the results screen displays.
     }
 
+    // UNDERSTAND: advanceTurn() moves currentPlayerIndex to the next player, wrapping back to 0 after the
+    // last player.
+    // DECISION: The modulo operator (%) was used instead of an if-check for "reached the last player"
+    // because it naturally wraps the index around for any number of players.
     private void advanceTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
     }
@@ -130,6 +153,10 @@ public class GameEngineImpl implements GameEngine {
                 .orElse(null);
     }
 
+    // UNDERSTAND: startNewMatch() sets up a best-of-N series — it calculates roundsToWin from the bestOf
+    // value, creates the players, then starts the first round.
+    // DECISION: roundsToWin was calculated as (bestOf / 2) + 1 instead of asking for it directly, so the
+    // caller only has to think in terms of "best of 3 / best of 5" rather than doing that math themselves.
     @Override
     public void startNewMatch(Difficulty difficulty, Theme theme, List<String> playerNames, int bestOf) {
         if (bestOf < 1) {
@@ -147,6 +174,10 @@ public class GameEngineImpl implements GameEngine {
         startRoundInternal();
     }
 
+    // UNDERSTAND: startNextRound() resets each player's per-round stats (but not roundsWon) and generates a
+    // new board, so the series can continue.
+    // DECISION: An IllegalStateException is thrown if called with no match in progress or after the match
+    // is already over, so a UI bug can't accidentally start a "round 6" of a match that already ended.
     @Override
     public void startNextRound() {
         if (matchDifficulty == null || matchTheme == null || players == null) {
@@ -199,6 +230,10 @@ public class GameEngineImpl implements GameEngine {
         return matchTheme;
     }
 
+    // UNDERSTAND: getMatchWinner() and getLoser() figure out who has won or lost the whole series based on
+    // roundsWon compared to roundsToWin.
+    // DECISION: getLoser() was implemented by filtering for "the player who isn't the winner" instead of
+    // hardcoding index 0/1, so it still works correctly if more than 2 players are ever supported later.
     @Override
     public Player getLoser() {
         Player winner = getMatchWinner();

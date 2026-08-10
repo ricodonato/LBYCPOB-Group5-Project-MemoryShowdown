@@ -22,19 +22,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * UI-owned application navigator
- * and shared UI state.
- *
- * The UI uses the real Group 5
- * GameEngineImpl so the screens
- * reflect the current best-of-series
- * game logic.
- *
- * LeaderboardService stays nullable
- * until the backend is connected to
- * the JavaFX lifecycle.
- */
+// UNDERSTAND: A singleton class that holds shared state across every screen (which engine/services to
+// use, pending player names/settings, current round number) and handles switching from one FXML screen
+// to another.
+// DECISION: A singleton (private constructor + static get()) was used instead of passing this object
+// around through every controller's constructor, because JavaFX creates controller instances itself via
+// FXMLLoader — there's no clean way to inject dependencies into them manually, so a single globally
+// reachable instance was the simplest way to share state between screens.
 public class SceneManager {
     private boolean tournamentModeActive = false;
     private Difficulty tournamentDifficulty = Difficulty.EASY;
@@ -78,6 +72,8 @@ public class SceneManager {
     private int pendingBestOf = 3;
     private int currentRoundNumber = 1;
 
+    // UNDERSTAND: The private constructor creates the real GameEngineImpl and TournamentServiceImpl
+    // right away, but leaves leaderboardService as null until MainApp wires up the real Spring bean.
     private SceneManager() {
 
         this.gameEngine =
@@ -89,6 +85,10 @@ public class SceneManager {
         this.leaderboardService = null;
     }
 
+    // UNDERSTAND: get() returns the one shared SceneManager, creating it the first time it's called.
+    // DECISION: Lazy initialization (only creating the instance the first time get() is called) was used
+    // instead of eagerly creating it as a static field, so GameEngineImpl/TournamentServiceImpl aren't
+    // constructed until the app actually needs them.
     public static SceneManager get() {
 
         if (instance == null) {
@@ -106,6 +106,11 @@ public class SceneManager {
         stage.setMinHeight(700);
     }
 
+    // UNDERSTAND: switchTo() loads a new FXML file, builds a Scene sized to the screen's visual bounds,
+    // attaches the shared stylesheet if it exists, and swaps it into the app's single Stage.
+    // DECISION: The scene is resized to Screen.getPrimary().getVisualBounds() every time instead of
+    // using a fixed size, so the app fills the user's actual screen resolution rather than looking too
+    // small or too large on different monitors.
     public void switchTo(
             String fxmlPath,
             String title

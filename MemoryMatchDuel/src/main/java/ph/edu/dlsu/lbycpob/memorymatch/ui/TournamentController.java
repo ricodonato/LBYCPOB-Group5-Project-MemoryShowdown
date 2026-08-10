@@ -14,6 +14,8 @@ import ph.edu.dlsu.lbycpob.memorymatch.service.TournamentService;
 import java.util.ArrayList;
 import java.util.List;
 
+// UNDERSTAND: Controls the tournament screen — lets players join, generates the bracket, shows the
+// current round's matches as clickable rows, and shows the champion once the bracket is finished.
 public class TournamentController extends BaseScreenController {
 
     @FXML private TextField joinField;
@@ -50,6 +52,11 @@ public class TournamentController extends BaseScreenController {
         refreshPlayerList();
     }
 
+    // UNDERSTAND: handleGenerateSchedule() checks there are at least 2 players and an even number of
+    // them before switching to the setup screen to pick tournament settings.
+    // DECISION: The even-player check was added on the UI side (in addition to whatever TournamentService
+    // itself does) so the player gets a clear, specific error message here instead of a generic exception
+    // bubbling up from the service layer.
     @FXML
     private void handleGenerateSchedule() {
         int count = tournamentService.getRegisteredPlayers().size();
@@ -69,6 +76,8 @@ public class TournamentController extends BaseScreenController {
         SceneManager.get().switchTo("/fxml/setup.fxml", "Memory Match Showdown - Tournament Settings");
     }
 
+    // UNDERSTAND: createMatchRow() builds one row showing "PlayerA VS PlayerB" and a button that either
+    // says "PLAY" or, once played, shows the winner and disables itself.
     private HBox createMatchRow(TournamentMatch match) {
         HBox row = new HBox(12);
         row.setAlignment(Pos.CENTER);
@@ -90,6 +99,12 @@ public class TournamentController extends BaseScreenController {
         return row;
     }
 
+    // UNDERSTAND: startBracketMatch() stores which bracket match is being played, loads both player
+    // names into the game engine using the tournament's chosen difficulty/theme/best-of, then jumps to
+    // the game board.
+    // DECISION: setActiveTournamentMatch(match) is stored on SceneManager before switching screens, so
+    // that later, when ResultsController sees the match finish, it knows which bracket match to record
+    // the winner against.
     private void startBracketMatch(TournamentMatch match) {
         SceneManager manager = SceneManager.get();
 
@@ -107,6 +122,11 @@ public class TournamentController extends BaseScreenController {
         manager.switchTo("/fxml/game_board.fxml", "Memory Match Showdown - Game");
     }
 
+    // UNDERSTAND: refreshMatches() shows the champion banner if the tournament is done, a "generate a
+    // bracket" prompt if nothing's been generated yet, or the current round's non-bye matches otherwise.
+    // DECISION: Bye matches are filtered out of the displayed rows (if (!match.isBye())) because a bye
+    // is auto-resolved by the service already — showing it as a clickable "PLAY" match would be
+    // confusing since there's no real opponent to play against.
     private void refreshMatches() {
         matchesContainer.getChildren().clear();
 

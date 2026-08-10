@@ -7,6 +7,10 @@ import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 
 import java.util.List;
 
+// UNDERSTAND: Defines the contract for anything that can run a memory-match game — starting rounds,
+// flipping cards, checking matches, and tracking match-level progress (rounds won, series winner).
+// DECISION: An interface was used instead of a single concrete class so the UI layer can be built and
+// tested against a fake implementation (GameEngineStub) before the real logic (GameEngineImpl) is done.
 public interface GameEngine {
 
     /** Starts a new round with the given difficulty, theme, and player names. */
@@ -33,7 +37,10 @@ public interface GameEngine {
     /** Returns the player with the highest score once the round is over. */
     Player getWinner();
 
-
+    // UNDERSTAND: Separate methods exist for round-level state (above) and match-level state (below).
+    // DECISION: These were kept as two separate concepts instead of merging them into one "game over" flag,
+    // because a best-of-series match can have multiple rounds, each with its own winner, before the match
+    // itself is decided.
     void startNewMatch(Difficulty difficulty, Theme theme, List<String> playerNames, int bestOf);
 
     /**

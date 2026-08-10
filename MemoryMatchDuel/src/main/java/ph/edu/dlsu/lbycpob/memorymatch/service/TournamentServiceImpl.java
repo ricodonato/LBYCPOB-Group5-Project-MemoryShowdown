@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// UNDERSTAND: Implements the tournament bracket logic — registering players, shuffling them into a
+// single-elimination bracket, and advancing round by round until one champion remains.
 public class TournamentServiceImpl implements TournamentService {
 
     private final List<String> registeredPlayers = new ArrayList<>();
@@ -13,6 +15,9 @@ public class TournamentServiceImpl implements TournamentService {
     private int currentRound = 0;
     private String champion;
 
+    // UNDERSTAND: joinTournament() only adds a player if they aren't already registered.
+    // DECISION: A contains() check was added before adding, instead of allowing duplicates, so the same
+    // player can't accidentally take two bracket slots.
     @Override
     public void joinTournament(String playerName) {
         if (!registeredPlayers.contains(playerName)) {
@@ -25,6 +30,11 @@ public class TournamentServiceImpl implements TournamentService {
         return registeredPlayers;
     }
 
+    // UNDERSTAND: generateBracket() shuffles the registered players, then pads the list with byes (null
+    // slots) until the size is a power of two, so the bracket can be split evenly into matches.
+    // DECISION: The bracket size was rounded up to the next power of two instead of requiring an exact
+    // power-of-two number of players, because it lets any number of players join, and byes automatically
+    // fill the empty slots.
     @Override
     public void generateBracket() {
         if (registeredPlayers.size() < 2) {
@@ -70,6 +80,11 @@ public class TournamentServiceImpl implements TournamentService {
         resolveByesAndAdvance();
     }
 
+    // UNDERSTAND: resolveByesAndAdvance() auto-wins any bye matches, then checks if the whole round is
+    // done. If only one winner remains, that player is the champion; otherwise it builds the next round
+    // from the current winners.
+    // DECISION: This method calls itself again after building the next round (recursion) instead of
+    // stopping there, in case the next round is also entirely byes and needs to resolve automatically too.
     private void resolveByesAndAdvance() {
         for (TournamentMatch match : currentRoundMatches) {
             if (match.isBye() && !match.isPlayed()) {

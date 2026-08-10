@@ -8,6 +8,11 @@ import ph.edu.dlsu.lbycpob.memorymatch.model.Theme;
 import java.util.ArrayList;
 import java.util.List;
 
+// UNDERSTAND: A fake, simplified stand-in for GameEngine that returns canned/predictable values instead
+// of real game logic.
+// DECISION: A stub class was used instead of testing directly against GameEngineImpl so the UI screens
+// could be built and clicked through before the real scoring/turn logic was finished, without waiting
+// on each other.
 public class GameEngineStub implements GameEngine {
 
     private final List<Card> fakeCards = new ArrayList<>();
@@ -31,6 +36,8 @@ public class GameEngineStub implements GameEngine {
         return fakeCards.stream().filter(c -> c.getId() == cardId).findFirst().orElse(null);
     }
 
+    // UNDERSTAND: checkMatch() always returns true, since the stub isn't meant to simulate real win/loss
+    // conditions — just give the UI something to render.
     @Override
     public boolean checkMatch() {
         return true;
@@ -72,6 +79,8 @@ public class GameEngineStub implements GameEngine {
         // No-op for the stub — nothing to advance.
     }
 
+    // UNDERSTAND: isMatchOver()/getMatchWinner() are effectively switched off (return false/null), since
+    // the stub doesn't simulate a real best-of-series outcome.
     @Override
     public boolean isMatchOver() {
         return false;

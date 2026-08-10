@@ -6,6 +6,8 @@ import javafx.scene.control.TextField;
 
 import java.util.List;
 
+// UNDERSTAND: Handles the screen where the two players type in their names before a regular (non
+// -tournament) match — validates the names and passes them to SceneManager for the next screen.
 public class NameEntryController extends BaseScreenController {
 
     @FXML
@@ -17,6 +19,8 @@ public class NameEntryController extends BaseScreenController {
     @FXML
     private Label errorLabel;
 
+    // UNDERSTAND: onScreenReady() pre-fills the text fields with any names already entered, so going
+    // "Back" from the setup screen doesn't wipe what the player typed.
     @Override
     protected void onScreenReady() {
 
@@ -36,6 +40,11 @@ public class NameEntryController extends BaseScreenController {
         }
     }
 
+    // UNDERSTAND: handleNext() runs three validation checks in order — both names filled in, names not
+    // identical, and names not too long — showing the first error found and stopping there.
+    // DECISION: Each check returns immediately on failure instead of collecting all errors at once,
+    // because only one errorLabel exists on screen — there's nowhere to show multiple messages at the
+    // same time.
     @FXML
     private void handleNext() {
 
@@ -89,6 +98,8 @@ public class NameEntryController extends BaseScreenController {
         );
     }
 
+    // UNDERSTAND: clean() turns a null text field value into an empty string and trims whitespace, so
+    // the rest of the validation never has to null-check.
     private String clean(String value) {
 
         return value == null
